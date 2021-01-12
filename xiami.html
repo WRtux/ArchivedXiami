@@ -115,11 +115,14 @@ tbody> li> nav> a {
  </table>
  <aside id="input">
   加载JSON <input type="file" accept="application/json,text/plain" />
+  转化csv表 <input type="file" accept=".csv,text/plain" />
+  <a id="download" download="导出歌单.json" style="display: none;"></a>
  </aside>
 </main>
 
 <script type="text/javascript">"use strict";
 document.getElementById("input").getElementsByTagName("input")[0].onchange = handleFile;
+document.getElementById("input").getElementsByTagName("input")[1].onchange = convertFile;
 
 function handleFile() {
 	let f = this.files[0];
@@ -129,6 +132,29 @@ function handleFile() {
 	fr.readAsText(f);
 	fr.onload = function (e) {
 		handleList(JSON.parse(e.target.result));
+	};
+}
+
+function convertFile() {
+	let f = this.files[0];
+	if (!f)
+		return;
+	let fr = new FileReader();
+	fr.readAsText(f);
+	fr.onload = function (e) {
+		let li = e.target.result.split("\n");
+		let dat = new Array();
+		li.shift();
+		for (let en of li) {
+			let res = en.trim().match(/^"?(.+?)"?,"?(.*?)"?,"?(.*?)(?:"|,|$)/);
+			if (res)
+				dat.push({ name: res[1], albumName: res[2], artistName: res[3] });
+		}
+		let blob = new Blob([JSON.stringify(dat)], { type: "application/json" });
+		let an = document.getElementById("download");
+		an.href = URL.createObjectURL(blob);
+		an.click();
+		handleList(dat);
 	};
 }
 
