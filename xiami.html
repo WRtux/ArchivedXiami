@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html><head>
+ <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.5, user-scalable=yes" />
+ <title>音乐 - FrozenXiami</title>
+ <style>
+body {
+	margin: 0;
+	background-color: #eeeeee;
+}
+#wrapper {
+	position: relative;
+	margin: 0 auto;
+	min-width: 70%;
+	width: 960px;
+	max-width: 100%;
+	min-height: 80vh;
+	overflow: hidden;
+	line-height: 1.4;
+	background-color: #ffffff;
+}
+#wrapper> h1 {
+	margin: 20px 20px;
+	font-size: 1.8em;
+}
+#wrapper> article, #wrapper> aside {
+	margin: 20px 0;
+	padding: 10px 20px;
+	background-color: #f7f7f7;
+	overflow: hidden;
+}
+#wrapper> table {
+	margin: 15px 0;
+	padding: 0 20px;
+	width: 100%;
+	overflow: hidden;
+}
+#wrapper> iframe#player {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: none;
+	border: none;
+	width: 125%;
+	height: 50vh;
+	background-color: #f7f7f7;
+	transform-origin: left top;
+	transform: scale(0.8);
+}
+table {
+	table-layout: fixed;
+	border-spacing: 0;
+}
+tbody> li {
+	display: table-row;
+	list-style-type: none;
+}
+tbody> li:nth-child(even) {
+	background-color: #f7f7f7;
+}
+th, td, tbody> li> * {
+	display: table-cell;
+	padding: 5px;
+}
+th {
+	border-bottom: 1px solid #cccccc;
+	text-align: left;
+}
+tbody> li> a {
+	text-decoration: none;
+	color: #333333;
+}
+tbody> li> nav {
+	position: relative;
+}
+tbody> li> nav> a {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: block;
+	margin: auto;
+	width: 20px;
+	height: 20px;
+	border-radius: 5px;
+	font-size: 15px;
+	line-height: 20px;
+	text-align: center;
+	text-decoration: none;
+	background-color: #ff4409;
+	color: #ffffff;
+}
+ </style>
+</head><body>
+
+<main id="wrapper">
+ <iframe id="player" name="player"></iframe>
+ <h1>音乐</h1>
+ <table id="list">
+  <thead>
+   <tr>
+    <th style="width: 40%;">曲目</th>
+    <th style="width: 30%;">专辑</th>
+    <th style="width: 30%;">艺人</th>
+    <th style="width: 20px;"></th>
+   </tr>
+  </thead>
+  <tbody id="list-body">
+   <!-- Dynamic -->
+  </tbody>
+  <template id="list-template">
+   <li><a></a><a></a><a></a><nav><a target="player">▶</a></nav></li>
+  </template>
+ </table>
+ <aside id="input">
+  加载JSON <input type="file" accept="application/json,text/plain" />
+ </aside>
+</main>
+
+<script type="text/javascript">"use strict";
+document.getElementById("input").getElementsByTagName("input")[0].onchange = handleFile;
+
+function handleFile() {
+	let f = this.files[0];
+	if (!f)
+		return;
+	let fr = new FileReader();
+	fr.readAsText(f);
+	fr.onload = function (e) {
+		handleList(JSON.parse(e.target.result));
+	};
+}
+
+function handleList(o) {
+	o = o instanceof Array ? o : o.songs;
+	let con = document.getElementById("list-template").content;
+	let eles = con.firstElementChild.children;
+	for (let en of o) {
+		eles[0].href = "https://www.xiami.com/song/" + (en.id || en.sid);
+		//"https://music.163.com/#/search/m/?type=1&s=" + encodeURIComponent(en.name)
+		eles[0].textContent = en.name;
+		eles[1].textContent = en.albumName || en.album;
+		eles[2].textContent = en.artistName || en.artist;
+		eles[3].firstElementChild.href = "";
+		document.getElementById("list-body").appendChild(document.importNode(con, true));
+	}
+}
+</script>
+</body></html>
