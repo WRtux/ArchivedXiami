@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html><head>
+ <meta charset="UTF-8" />
+ <title>Workspace</title>
+ <style>
+body {
+	margin: 0;
+	height: 100vh;
+	overflow: hidden;
+}
+#wrapper {
+	box-sizing: border-box;
+	width: 40vw;
+	height: 100vh;
+	padding: 10px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	line-height: 1.4;
+}
+#interface {
+	position: fixed;
+	top: 0;
+	right: 0;
+	margin: 0;
+	box-sizing: border-box;
+	width: 75vw;
+	height: 125vh;
+	border: none;
+	border-left: 2px solid #cccccc;
+	background-color: #f7f7f7;
+	transform-origin: right top;
+	transform: scale(0.8);
+}
+#helper {
+	display: none;
+}
+section {
+	margin: 15px -10px;
+	padding: 10px;
+	background-color: #f7f7f7;
+}
+main> *:first-child, section> *:first-child {
+	margin-top: 0;
+}
+main> *:last-child, section> *:last-child {
+	margin-bottom: 0;
+}
+h1 {
+	margin: 15px 0;
+	font-size: 1.6em;
+}
+h2 {
+	margin: 15px 0;
+	font-size: 1.4em;
+	font-weight: 600;
+}
+ol, ul {
+	margin: 10px 0;
+	padding-left: 25px;
+}
+ul.inspect {
+	box-sizing: border-box;
+	border: 1px solid #cccccc;
+	padding: 0;
+	height: 20vh;
+	max-height: 80vh;
+	resize: vertical;
+	overflow-x: hidden;
+	overflow-y: auto;
+	list-style-type: none;
+	font-size: 0.9em;
+	background-color: #ffffff;
+}
+ul.inspect> li {
+	padding: 2px;
+}
+ul.inspect> li:nth-child(even) {
+	background-color: #f7f7f7;
+}
+ul.inspect> li a {
+	text-decoration: none;
+	color: #333333;
+}
+li> aside {
+	height: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	transition: height 0.3s;
+}
+li:hover> aside {
+	height: 50px;
+}
+textarea {
+	display: block;
+	box-sizing: border-box;
+	margin: 10px 0;
+	width: 100%;
+	height: 10vh;
+	resize: none;
+	transition: height 0.3s;
+}
+textarea:focus {
+	height: 30vh;
+}
+ </style>
+</head><body>
+
+<main id="wrapper">
+ <h1>Workspace</h1>
+ <h2>Capture script</h2>
+ <textarea id="input">//Paste capture script here...</textarea>
+ <section>
+  <h2>Pool</h2>
+  <ul id="pool-artists" class="inspect"></ul>
+  <ul id="pool-albums" class="inspect"></ul>
+  <ul id="pool-songs" class="inspect"></ul>
+ </section>
+</main>
+
+<iframe id="interface" name="interface" src="//emumo.xiami.com"></iframe>
+
+<aside id="helper">
+ <a id="download" download="output.json"></a>
+ <template id="pool-template">
+  <li>
+   <a target="interface"></a>
+   <aside><span></span><br /><span></span></aside>
+  </li>
+ </template>
+</aside>
+
+<script src="https://file.wrtux.top/script/domease.min.js"></script>
+<script src="https://file.wrtux.top/script/md5.min.js"></script>
+<script src="https://file.wrtux.top/script/xiami/queue.js"></script>
+<script src="https://file.wrtux.top/script/xiami/pool.js"></script>
+<script type="text/javascript">"use strict";
+var visual = { artists: new Map(), albums: new Map(), songs: new Map() };
+
+document.queryId("input").onblur = function () {
+	createScript(this.value);
+	this.readOnly = true;
+	this.onblur = null;
+};
+for (let n in pool) {
+	pool[n].set = function (k, v) {
+		Map.prototype.set.apply(this, arguments);
+		setTimeout(notifySet, 5, n, k, v);
+	};
+}
+
+function createScript(scr) {
+	var ele = document.buildElement("script", scr);
+	document.body.appendChild(ele);
+}
+function notifySet(n, id, en) {
+	let cont = document.queryId("pool-" + n);
+	if (cont) {
+		let ele = visual[n].get(id);
+		if (!ele) {
+			ele = document.importNode(document.queryId("pool-template").content.firstElementChild, true);
+			visual[n].set(id, ele);
+			cont.appendChild(ele);
+		}
+		ele.queryTagName("a")[0].href = en.url;
+		ele.queryTagName("a")[0].textContent = en.name;
+		ele.queryTagName("span")[0].textContent = en.description;
+	}
+}
+</script>
+</body>
