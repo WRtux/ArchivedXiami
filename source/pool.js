@@ -22,7 +22,13 @@ for (let n in base)
 base.genreExp = new RegExp("(?:" + base.genre + "|" + base.style + ")([0-9A-Za-z]+)");
 
 function loadPool(dat) {
-	//TODO
+	if (typeof dat == "string")
+		dat = JSON.parse(dat);
+	for (let n in dat) {
+		pool[n].clear();
+		for (let en of dat[n])
+			pool[n].set(en.sid, en);
+	}
 }
 
 function savePool() {
