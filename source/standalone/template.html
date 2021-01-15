@@ -131,6 +131,7 @@ textarea:focus {
 </aside>
 
 <script src="https://file.wrtux.top/script/domease.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-base64@3.5/base64.min.js"></script>
 <script src="https://file.wrtux.top/script/md5.min.js"></script>
 <script src="https://file.wrtux.top/script/xiami/queue.js"></script>
 <script src="https://file.wrtux.top/script/xiami/pool.js"></script>
@@ -140,7 +141,15 @@ var visual = { artists: new Map(), albums: new Map(), songs: new Map() };
 document.queryId("input").onblur = function () {
 	createScript(this.value);
 	this.readOnly = true;
+	this.blur = this.onblur;
 	this.onblur = null;
+};
+document.queryId("input").ondblclick = function () {
+	if (!queue.status.start) {
+		this.value = "";
+		this.readOnly = false;
+		this.onblur = this.blur;
+	}
 };
 for (let n in pool) {
 	pool[n].set = function (k, v) {
@@ -150,7 +159,7 @@ for (let n in pool) {
 }
 
 function createScript(scr) {
-	var ele = document.buildElement("script", scr);
+	let ele = document.buildElement("script", scr);
 	document.body.appendChild(ele);
 }
 function notifySet(n, id, en) {
