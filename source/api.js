@@ -1,5 +1,17 @@
 "use strict";
 
+function getPreloadedData(doc) {
+	let eles = doc.body.queryTagName("script");
+	for (let ele of eles) {
+		let scr = ele.textContent;
+		if (scr.startsWith("window.__PRELOADED_STATE__")) {
+			let str = Base64.decode(scr.substring(scr.indexOf('"') + 1, scr.lastIndexOf('"')));
+			return JSON.parse(str);
+		}
+	}
+	return null;
+}
+
 function fetchComment(typ, sid, m) {
 	if (m == "hot")
 		m = true;
@@ -21,3 +33,8 @@ function fetchComment(typ, sid, m) {
 		return null;
 }
 
+function clearCookie() {
+	let ks = document.cookie.match(/[^=;\s]+(?==)/g);
+	for (let k of ks)
+		document.cookie = k + "=; expires=" + new Date(0).toUTCString();
+}
