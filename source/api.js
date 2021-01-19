@@ -1,7 +1,29 @@
 "use strict";
 
+var frame = document.getElementById("interface"), download = document.getElementById("download");
+var base = {
+	artist: "/artist/", album: "/album/", song: "/song/",
+	genre: "/genre/detail/gid/", style: "/genre/detail/sid/", collect: "/collect/",
+	user: "/user/"
+};
+for (let n in base)
+	base[n + "Exp"] = new RegExp(base[n] + "([0-9A-Za-z]+)");
+base.genreExp = new RegExp("(?:" + base.genre + "|" + base.style + ")([0-9A-Za-z]+)");
+
+function clearCookie() {
+	let li = document.cookie.match(/[^=;\s]+(?==)/g);
+	for (let k of li)
+		document.cookie = k + "=; expires=" + new Date(0).toUTCString();
+}
+
+function downloadJSON(o) {
+	let blob = new Blob([JSON.stringify(o)], { type: "application/json" });
+	download.href = URL.createObjectURL(blob);
+	download.click();
+}
+
 function getPreloadedData(doc) {
-	let eles = doc.body.queryTagName("script");
+	let eles = doc.body.getElementsByTagName("script");
 	for (let ele of eles) {
 		let scr = ele.textContent;
 		if (scr.startsWith("window.__PRELOADED_STATE__")) {
@@ -31,10 +53,4 @@ function fetchComment(typ, sid, m) {
 		return JSON.parse(xhr.responseText);
 	else
 		return null;
-}
-
-function clearCookie() {
-	let ks = document.cookie.match(/[^=;\s]+(?==)/g);
-	for (let k of ks)
-		document.cookie = k + "=; expires=" + new Date(0).toUTCString();
 }

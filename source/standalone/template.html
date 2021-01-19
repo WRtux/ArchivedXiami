@@ -28,6 +28,7 @@ body {
 	height: 125vh;
 	border: none;
 	border-left: 2px solid #cccccc;
+	pointer-events: none;
 	background-color: #f7f7f7;
 	transform-origin: right top;
 	transform: scale(0.8);
@@ -109,7 +110,7 @@ textarea:focus {
 <main id="wrapper">
  <h1>Workspace</h1>
  <h2>Capture script</h2>
- <textarea id="input">//Paste capture script here...</textarea>
+ <textarea id="input" placeholder="//Paste capture script here"></textarea>
  <section>
   <h2>Pool</h2>
   <ul id="pool-artists" class="inspect"></ul>
@@ -130,26 +131,23 @@ textarea:focus {
  </template>
 </aside>
 
-<script src="https://file.wrtux.top/script/domease.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-base64@3.5/base64.min.js"></script>
 <script src="https://file.wrtux.top/script/md5.min.js"></script>
+<script src="https://file.wrtux.top/script/xiami/api.js"></script>
 <script src="https://file.wrtux.top/script/xiami/queue.js"></script>
 <script src="https://file.wrtux.top/script/xiami/pool.js"></script>
 <script type="text/javascript">"use strict";
 var visual = { artists: new Map(), albums: new Map(), songs: new Map() };
 
-document.queryId("input").onblur = function () {
-	createScript(this.value);
-	this.readOnly = true;
-	this.blur = this.onblur;
-	this.onblur = null;
-};
-document.queryId("input").ondblclick = function () {
-	if (!queue.status.start) {
-		this.value = "";
-		this.readOnly = false;
-		this.onblur = this.blur;
+document.getElementById("input").onblur = function () {
+	if (!this.readOnly) {
+		createScript(this.value);
+		this.readOnly = true;
 	}
+};
+document.getElementById("input").ondblclick = function () {
+	if (!queue.status.start)
+		this.readOnly = false;
 };
 for (let n in pool) {
 	pool[n].set = function (k, v) {
@@ -159,21 +157,23 @@ for (let n in pool) {
 }
 
 function createScript(scr) {
-	let ele = document.buildElement("script", scr);
+	let ele = document.createElement("script");
+	ele.textContent = scr;
 	document.body.appendChild(ele);
 }
 function notifySet(n, id, en) {
-	let cont = document.queryId("pool-" + n);
+	let cont = document.getElementById("pool-" + n);
 	if (cont) {
 		let ele = visual[n].get(id);
 		if (!ele) {
-			ele = document.importNode(document.queryId("pool-template").content.firstElementChild, true);
+			ele = document.getElementById("pool-template").content.firstElementChild;
+			ele = document.importNode(ele, true);
 			visual[n].set(id, ele);
 			cont.appendChild(ele);
 		}
-		ele.queryTagName("a")[0].href = en.url;
-		ele.queryTagName("a")[0].textContent = en.name;
-		ele.queryTagName("span")[0].textContent = en.description;
+		ele.getElementsByTagName("a")[0].href = en.url;
+		ele.getElementsByTagName("a")[0].textContent = en.name;
+		ele.getElementsByTagName("span")[0].textContent = en.description;
 	}
 }
 </script>
