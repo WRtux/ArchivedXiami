@@ -35,8 +35,8 @@ function proceedQueue() {
 function fakeNavigate(m, url, ref, func) {
 	let wnd = window;
 	if (ref && frame.contentDocument) {
-		wnd.location.pushState(null, null, ref);
 		wnd = frame.contentWindow;
+		wnd.history.pushState(null, null, ref);
 	}
 	if (m == "frame") {
 		if (wnd != window)
