@@ -13,13 +13,11 @@ function initGenre(doc) {
 }
 
 function captureGenre(doc) {
+	let id = this.url.match(base.oldGenreExp)[1];
 	let cont = doc.getElementById("texts");
 	let n = cont.getElementsByTagName("h3")[0].textContent.trim(),
 		txt = cont.getElementsByClassName("content")[0].textContent.trim();
-	let en = {
-		type: this.type, id: this.url.match(base.genreExp)[1], update: new Date().getTime(),
-		name: n, description: txt
-	};
+	let en = { type: this.type, id: id, update: new Date().getTime(), name: n, description: txt };
 	en.songs = new Array();
 	cont = doc.querySelector("#songs> .content");
 	let eles = cont.getElementsByClassName("info");
@@ -27,8 +25,8 @@ function captureGenre(doc) {
 		let sng = ele.getElementsByTagName("a")[0], art = ele.getElementsByTagName("a")[1];
 		let sid = sng.href.match(base.songExp)[1], uid = art && (art.href.match(base.artistExp) || "")[1];
 		en.songs.push({ sid: sid, name: sng.textContent, artistSid: uid, artistName: art.textContent });
-		pool.songs.weigh({ sid: sid, referrer: doc.location.pathname, name: sng.textContent, weight: 8 });
-		pool.artists.weigh({ sid: uid, referrer: doc.location.pathname, name: art.textContent, weight: 5 });
+		pool.songs.weigh({ sid: sid, referrer: base[this.type] + id, name: sng.textContent, weight: 8 });
+		pool.artists.weigh({ sid: uid, referrer: base[this.type] + id, name: art.textContent, weight: 5 });
 	}
 	en.albums = new Array();
 	cont = doc.querySelector("#albums> .content");
@@ -37,8 +35,8 @@ function captureGenre(doc) {
 		let alb = ele.getElementsByTagName("a")[0], art = ele.getElementsByTagName("a")[1];
 		let aid = alb.href.match(base.albumExp)[1], uid = art && (art.href.match(base.artistExp) || "")[1];
 		en.albums.push({ sid: aid, name: alb.textContent, artistSid: uid, artistName: art.textContent });
-		pool.albums.weigh({ sid: aid, referrer: doc.location.pathname, name: alb.textContent, weight: 7 });
-		pool.artists.weigh({ sid: uid, referrer: doc.location.pathname, name: art.textContent, weight: 4 });
+		pool.albums.weigh({ sid: aid, referrer: base[this.type] + id, name: alb.textContent, weight: 7 });
+		pool.artists.weigh({ sid: uid, referrer: base[this.type] + id, name: art.textContent, weight: 4 });
 	}
 	en.artists = new Array();
 	cont = doc.querySelector("#artists> .content");
@@ -47,7 +45,7 @@ function captureGenre(doc) {
 		let art = ele.getElementsByTagName("a")[0];
 		let uid = art.href.match(base.artistExp)[1];
 		en.artists.push({ sid: uid, name: art.textContent });
-		pool.artists.weigh({ sid: uid, referrer: doc.location.pathname, name: art.textContent, weight: 7 });
+		pool.artists.weigh({ sid: uid, referrer: base[this.type] + id, name: art.textContent, weight: 7 });
 	}
 	if (this.type == "genre") {
 		en.styles = new Array();

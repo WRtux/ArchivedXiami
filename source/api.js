@@ -3,15 +3,15 @@
 var frame = document.getElementById("interface"), download = document.getElementById("download");
 var base = {
 	artist: "/artist/", album: "/album/", song: "/song/",
-	genre: "/genre/detail/gid/", style: "/genre/detail/sid/", collect: "/collect/",
+	genre: "/genre/gid/", style: "/genre/sid/", collect: "/collect/",
 	user: "/user/"
 };
 for (let n in base)
 	base[n + "Exp"] = new RegExp(base[n] + "([0-9A-Za-z]+)");
-base.genreExp = new RegExp("(?:" + base.genre + "|" + base.style + ")([0-9A-Za-z]+)");
+base.oldGenreExp = new RegExp("/genre/detail/(?:gid/|sid/)" + "([0-9A-Za-z]+)");
 
 function clearCookie() {
-	let li = document.cookie.match(/[^=;\s]+(?==)/g);
+	let li = document.cookie.match(/[^;\s]+(?==)/g);
 	for (let k of li)
 		document.cookie = k + "=; expires=" + new Date(0).toUTCString();
 }
