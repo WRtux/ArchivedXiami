@@ -1,18 +1,23 @@
 "use strict";
 var queue = [];
-queue.status = { start: null, update: null, iterateCount: 0, queryCount: 0, mergeCount: 0 };
+queue.status = { start: null, update: null, task: null, iterateCount: 0, queryCount: 0, mergeCount: 0 };
 var data = undefined;
 
 function startQueue(tsk) {
 	queue.status.start = new Date();
-	if (tsk)
-		queue.unshift(tsk);
+	tsk && queue.unshift(tsk);
 	proceedQueue();
 }
 
 function pauseQueue(f) {
-	if (f)
+	if (f) {
+		frame.contentDocument && frame.contentWindow.stop();
 		frame.onload = null;
+		if (queue.status.task) {
+			queue.unshift(queue.status.task);
+			queue.status.task = null;
+		}
+	}
 	queue.status.start = null;
 }
 
@@ -21,7 +26,19 @@ function proceedQueue() {
 		return;
 	if (queue.length > 0) {
 		let tsk = queue.shift();
-		fakeNavigate(tsk.mode, tsk.url, tsk.referrer, tsk.callback.bind(tsk));
+		queue.status.task = tsk;
+		fakeNavigate(tsk.mode, tsk.url, tsk.referrer, function (doc) {
+			try {
+				queue.status.task.callback(doc);
+			} catch (err) {
+				pauseQueue(true);
+				console.error(err);
+				return;
+			}
+			queue.status.task = null;
+			queue.status.update = new Date();
+			setTimeout(proceedQueue, 1000);
+		});
 	} else {
 		if (data && Object.keys(data).length > 0) {
 			downloadJSON(data);
@@ -45,23 +62,20 @@ function fakeNavigate(m, url, ref, func) {
 			frame.src = url;
 		frame.onload = function () {
 			func(this.contentDocument);
-			queue.status.update = new Date();
-			setTimeout(proceedQueue, 1000);
 			this.onload = null;
 		};
 	} else {
 		let xhr = new wnd.XMLHttpRequest();
 		xhr.open("GET", url, true);
-		xhr.responseType = "document";
+		if (m == "ajax")
+			xhr.responseType = "document";
 		xhr.send();
 		xhr.onload = function () {
 			func(this.response);
-			queue.status.update = new Date();
-			setTimeout(proceedQueue, 1000);
 		};
 		xhr.onerror = function () {
 			this.open("GET", url, true);
-			this.send();
+			setTimeout(this.send.bind(this), 1000);
 		};
 	}
 }

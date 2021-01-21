@@ -146,8 +146,10 @@ document.getElementById("input").onblur = function () {
 	}
 };
 document.getElementById("input").ondblclick = function () {
-	if (!queue.status.start)
+	if (!queue.status.start) {
 		this.readOnly = false;
+		this.value = "";
+	}
 };
 for (let n in pool) {
 	pool[n].set = function (k, v) {
