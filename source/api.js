@@ -17,7 +17,7 @@ function clearCookie() {
 }
 
 function downloadJSON(o) {
-	let blob = new Blob([JSON.stringify(o)], { type: "application/json" });
+	let blob = new Blob([JSON.stringify(o, null, 1)], { type: "application/json" });
 	download.href = URL.createObjectURL(blob);
 	download.click();
 }
