@@ -12,6 +12,15 @@ for (let n in pool) {
 			this.set(o.sid, en);
 		}
 	};
+	pool[n].inflate = function (o) {
+		if (!o || !o.sid)
+			return;
+		let en = this.get(o.sid) || new Object();
+		delete en.referrer;
+		delete en.weight;
+		Object.assign(en, o);
+		this.set(o.sid, en);
+	};
 }
 
 function loadPool(dat) {

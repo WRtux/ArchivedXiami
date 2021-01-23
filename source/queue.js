@@ -27,6 +27,7 @@ function proceedQueue() {
 	if (queue.length > 0) {
 		let tsk = queue.shift();
 		queue.status.task = tsk;
+		tsk.builder && (tsk.url = tsk.builder());
 		fakeNavigate(tsk.mode, tsk.url, tsk.referrer, function (doc) {
 			try {
 				queue.status.task.callback(doc);

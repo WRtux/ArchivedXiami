@@ -22,6 +22,32 @@ function downloadJSON(o) {
 	download.click();
 }
 
+function buildRequestURL(api, param) {
+	let coki = document.cookie.match(/(?:^|[;\s])xm_sg_tk=([^;]*)/)[1];
+	coki = coki.substring(0, coki.indexOf("_"));
+	if (typeof param != "string")
+		param = JSON.stringify(param);
+	let hash = md5(coki + "_xmMain_" + api + "_" + param);
+	return api +
+		((api.indexOf("?") == -1) ? "?_q=" + encodeURIComponent(param) : "") +
+		"&_s=" + hash;
+}
+
+function fetchComment(typ, sid, lim) {
+	if (lim == 0)
+		return null;
+	let url = "/api/comment/" + (lim > 0 ? "getCommentList" : "getHotCommentList");
+	let param = { objectId: sid, objectType: typ, pagingVO: { page: 1, pageSize: Math.abs(lim) } };
+	url = buildRequestURL(url, param);
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", url, false);
+	xhr.send();
+	if (xhr.status >= 200 && xhr.status < 300)
+		return JSON.parse(xhr.responseText);
+	else
+		return null;
+}
+
 function getPreloadedData(doc) {
 	let eles = doc.body.getElementsByTagName("script");
 	for (let ele of eles) {
@@ -32,25 +58,4 @@ function getPreloadedData(doc) {
 		}
 	}
 	return null;
-}
-
-function fetchComment(typ, sid, m) {
-	if (m == "hot")
-		m = true;
-	else if (m == "new")
-		m = false;
-	else if (typeof m == "undefined")
-		m = true;
-	let url = "/api/comment/" + (m ? "getHotCommentList" : "getCommentList");
-	let param = JSON.stringify({ objectId: sid, objectType: typ, pagingVO: { page: 1, pageSize: m ? 10 : 20 } });
-	let coki = document.cookie.match(/(?:^|;)\s*xm_sg_tk=([^;]*)/)[1];
-	coki = coki.substring(0, coki.indexOf("_"));
-	let hash = md5(coki + "_xmMain_" + url + "_" + param);
-	let xhr = new XMLHttpRequest();
-	xhr.open("GET", url + "?_q=" + encodeURIComponent(param) + "&_s=" + hash, false);
-	xhr.send();
-	if (xhr.status >= 200 && xhr.status < 300)
-		return JSON.parse(xhr.responseText);
-	else
-		return null;
 }
