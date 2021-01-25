@@ -1,25 +1,25 @@
 "use strict";
-var pool = { artists: new Map(), albums: new Map(), songs: new Map() };
+var pool = { artists: new Map(), albums: new Map(), songs: new Map(), comments: new Map() };
 
 for (let n in pool) {
 	pool[n].weigh = function (o) {
-		if (!o || !o.sid)
+		if (!o || (!o.sid && !o.id))
 			return;
-		let w = (this.get(o.sid) || "").weight;
+		let w = (this.get(o.sid || o.id) || "").weight;
 		if (!w || o.weight >= w) {
 			let en = new Object();
 			Object.assign(en, o);
-			this.set(o.sid, en);
+			this.set(o.sid || o.id, en);
 		}
 	};
 	pool[n].inflate = function (o) {
-		if (!o || !o.sid)
+		if (!o || (!o.sid && !o.id))
 			return;
-		let en = this.get(o.sid) || new Object();
+		let en = this.get(o.sid || o.id) || new Object();
 		delete en.referrer;
 		delete en.weight;
 		Object.assign(en, o);
-		this.set(o.sid, en);
+		this.set(o.sid || o.id, en);
 	};
 }
 
@@ -29,7 +29,7 @@ function loadPool(dat) {
 	for (let n in dat) {
 		pool[n].clear();
 		for (let en of dat[n])
-			pool[n].set(en.sid, en);
+			pool[n].set(en.sid || en.id, en);
 	}
 }
 
