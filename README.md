@@ -16,4 +16,4 @@ Tools may be needed to browse some huge JSON files.
 
 Scripts are in `/source/`.
 
-Copy the plain HTML code in `/source/standalone/template.html`, open a page in [xiami.com](https://www.xiami.com/list) and enter `javascript:\`<paste here>\`` in the navigation bar of the page to create a workspace for capturing.
+Copy the plain HTML code in `/source/standalone/template.html`, open a page in [xiami.com](https://www.xiami.com/list) and enter `javascript:\`\<paste here\>\`` in the navigation bar of the page to create a workspace for capturing.
