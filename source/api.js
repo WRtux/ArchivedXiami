@@ -25,8 +25,7 @@ function downloadJSON(o) {
 function buildRequestURL(api, param) {
 	let coki = document.cookie.match(/(?:^|[;\s])xm_sg_tk=([^;]*)/)[1];
 	coki = coki.substring(0, coki.indexOf("_"));
-	if (typeof param != "string")
-		param = JSON.stringify(param);
+	(typeof param != "string") && (param = JSON.stringify(param));
 	let hash = md5(coki + "_xmMain_" + api + "_" + param);
 	return api +
 		((api.indexOf("?") == -1) ? "?_q=" + encodeURIComponent(param) : "") +
@@ -42,10 +41,7 @@ function fetchComment(typ, sid, lim) {
 	let xhr = new XMLHttpRequest();
 	xhr.open("GET", url, false);
 	xhr.send();
-	if (xhr.status >= 200 && xhr.status < 300)
-		return JSON.parse(xhr.responseText);
-	else
-		return null;
+	return (xhr.status >= 200 && xhr.status < 300) ? JSON.parse(xhr.responseText) : null;
 }
 
 function getPreloadedData(doc) {

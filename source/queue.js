@@ -71,9 +71,7 @@ function fakeNavigate(m, url, ref, func) {
 		if (m == "ajax")
 			xhr.responseType = "document";
 		xhr.send();
-		xhr.onload = function () {
-			func(this.response);
-		};
+		xhr.onload = () => func(this.response);
 		xhr.onerror = function () {
 			this.open("GET", url, true);
 			setTimeout(this.send.bind(this), 1000);

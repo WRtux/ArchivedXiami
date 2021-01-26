@@ -1,6 +1,6 @@
 "use strict";
 
-for (let id of data) {
+for (let id of JSON.parse(dataInput)) {
 	let func = () => buildRequestURL("/api/collect/getCollectStaticUrl", { listId: id }); //api/collect/initialize
 	queue.push({
 		mode: "request", builder: func, referrer: "/list?type=collect", callback: prepareCollect,
@@ -29,11 +29,12 @@ function captureCollect(str) {
 	let en = {
 		id: cont.listId, update: new Date().getTime(), name: cont.collectName,
 		logo: cont.collectLogo, description: cont.description, tags: cont.tags,
-		user: { id: cont.user.userId, name: cont.user.nickName, avatar: cont.user.avatar },
+		user: null,
 		createTime: cont.gmtCreate, modifyTime: cont.gmtModify,
-		playCount: cont.playCount, collectCount: cont.collects, commentCount: cont.comments
+		playCount: cont.playCount, collectCount: cont.collects, commentCount: cont.comments,
+		songs: new Array(), commentSid: null
 	};
-	en.songs = new Array();
+	cont.user && (en.user = { id: cont.user.userId, name: cont.user.nickName, avatar: cont.user.avatar });
 	for (let i = 0; i < cont.songCount; i++) {
 		en.songs.push({ id: cont.allSongs[i], sid: (cont.allSongStringIds || "")[i] });
 //		pool.songs.weigh({ sid: cont.allSongStringIds[i], referrer: base.collect + this.id, weight: 6 });

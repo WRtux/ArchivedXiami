@@ -5,7 +5,7 @@ for (let n in pool) {
 	pool[n].weigh = function (o) {
 		if (!o || (!o.sid && !o.id))
 			return;
-		let w = (this.get(o.sid || o.id) || "").weight;
+		let w = (this.get(o.sid || o.id) || { weight: 0 }).weight || 10;
 		if (!w || o.weight >= w) {
 			let en = new Object();
 			Object.assign(en, o);

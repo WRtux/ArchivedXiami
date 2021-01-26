@@ -113,9 +113,10 @@ textarea:focus {
  <textarea id="input" placeholder="//Paste capture script here"></textarea>
  <section>
   <h2>Pool</h2>
-  <ul id="pool-artists" class="inspect"></ul>
-  <ul id="pool-albums" class="inspect"></ul>
-  <ul id="pool-songs" class="inspect"></ul>
+ </section>
+ <section>
+  <h2>Input</h2>
+  <input type="file" id="input-file" accept="application/json,text/plain" />
  </section>
 </main>
 
@@ -137,7 +138,7 @@ textarea:focus {
 <script src="https://file.wrtux.top/script/xiami/queue.js"></script>
 <script src="https://file.wrtux.top/script/xiami/pool.js"></script>
 <script type="text/javascript">"use strict";
-var visual = { artists: new Map(), albums: new Map(), songs: new Map() };
+var dataInput = null;
 
 document.getElementById("input").onblur = function () {
 	if (!this.readOnly) {
@@ -151,32 +152,18 @@ document.getElementById("input").ondblclick = function () {
 		this.value = "";
 	}
 };
-for (let n in pool) {
-	pool[n].set = function (k, v) {
-		Map.prototype.set.apply(this, arguments);
-		setTimeout(notifySet, 5, n, k, v);
-	};
-}
+
+document.getElementById("input-file").onchange = function () {
+	let f = this.files[0];
+	let fr = new FileReader();
+	f && fr.readAsText(f);
+	fr.onload = (e) => (dataInput = fr.result);
+};
 
 function createScript(scr) {
 	let ele = document.createElement("script");
 	ele.textContent = scr;
 	document.body.appendChild(ele);
-}
-function notifySet(n, id, en) {
-	let cont = document.getElementById("pool-" + n);
-	if (cont) {
-		let ele = visual[n].get(id);
-		if (!ele) {
-			ele = document.getElementById("pool-template").content.firstElementChild;
-			ele = document.importNode(ele, true);
-			visual[n].set(id, ele);
-			cont.appendChild(ele);
-		}
-		ele.getElementsByTagName("a")[0].href = en.url;
-		ele.getElementsByTagName("a")[0].textContent = en.name;
-		ele.getElementsByTagName("span")[0].textContent = en.description;
-	}
 }
 </script>
 </body>
