@@ -41,7 +41,7 @@ function fetchComment(typ, sid, lim) {
 	let xhr = new XMLHttpRequest();
 	xhr.open("GET", url, false);
 	xhr.send();
-	return (xhr.status >= 200 && xhr.status < 300) ? JSON.parse(xhr.responseText) : null;
+	return (xhr.status >= 200 && xhr.status < 300) ? JSON.parse(xhr.responseText).result.data : null;
 }
 
 function getPreloadedData(doc) {
