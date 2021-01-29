@@ -1,11 +1,10 @@
 "use strict";
 
 function inflateSongs() {
-	let str = arguments[0];
-	if (str) {
-		let en = inflateSong(JSON.parse(str).result.data, false);
+	if (arguments[0]) {
+		let en = parseSong(JSON.parse(arguments[0]).result.data, false);
 		if (en) {
-			en.lyrics && inflateComments("song", this.sid);
+			en.lyrics && inflateComment("song", this.sid);
 			en.lyrics && (en.commentSid = "song-" + this.sid);
 			pool.songs.inflate(en);
 		}
@@ -25,7 +24,7 @@ function inflateSongs() {
 	}
 }
 
-function inflateComments(typ, id, lim) {
+function inflateComment(typ, id, lim) {
 	let en = {
 		sid: typ + "-" + id, update: new Date().getTime(), count: undefined,
 		recentList: new Array(), hotList: new Array()
@@ -48,7 +47,7 @@ function inflateComments(typ, id, lim) {
 	return en;
 }
 
-function inflateSong(dat, f) {
+function parseSong(dat, f) {
 	(typeof dat == "string") && (dat = JSON.parse(dat));
 	let cont = f ? dat : dat.songDetail;
 	if (!cont || !cont.songId)
@@ -129,7 +128,7 @@ function parseCollect(dat) {
 			artistSid: sng.artistVOs && sng.artistVOs[0].artistStringId, artistName: sng.artistName,
 			albumSid: sng.albumStringId, albumName: sng.albumName
 		});
-		inflateSong(sng, true);
+		parseSong(sng, true);
 	}
 	queue.status.queryCount++;
 	return en;
