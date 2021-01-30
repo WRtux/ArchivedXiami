@@ -47,6 +47,16 @@ function mergePool(dat) {
 	}
 }
 
+function slicePool(li) {
+	let dat = new Object();
+	for (let n of li) {
+		dat[n] = new Array();
+		for (let [k, v] of pool[n])
+			dat[n].push(v);
+	}
+	return dat;
+}
+
 function savePool() {
 	let dat = new Object();
 	for (let n in pool) {
