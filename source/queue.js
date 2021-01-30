@@ -43,7 +43,7 @@ function proceedQueue() {
 	} else {
 		if (data && Object.keys(data).length > 0) {
 			downloadJSON(data);
-			data = undefined;
+//			data = undefined;
 			console.log("Capture complete.");
 		}
 		queue.status.start = null;
