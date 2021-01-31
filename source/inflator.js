@@ -4,40 +4,41 @@ function inflateSongs() {
 	if (arguments[0]) {
 		let en = parseSong(JSON.parse(arguments[0]).result.data, false);
 		if (en) {
-			en.lyrics && inflateComment("song", this.sid);
-			en.lyrics && (en.commentSid = "song-" + this.sid);
+			en.commentSid = inflateComment("song", this.sid) ? "song-" + this.sid : null;
 			pool.songs.inflate(en);
 		}
 		queue.status.iterateCount++;
-	} else
-		setTimeout(startQueue);
+		return;
+	}
 	for (let [k, v] of pool.songs) {
 		if (v.weight && v.weight <= 10) {
-			let url = buildRequestURL("/api/song/initialize", { songId: k });
+			let func = () => buildRequestURL("/api/song/initialize", { songId: k });
 			let ref = v.referrer || base.song + k;
 			queue.push({
-				mode: "request", url: url, referrer: ref, callback: inflateSongs,
-				sid: k
+				mode: "request", builder: func, referrer: ref, callback: inflateSongs,
+				type: "song", sid: k
 			});
-			break;
 		}
 	}
+	window.setTimeout(startQueue);
 }
 
 function inflateComment(typ, id, lim) {
 	let en = {
 		sid: typ + "-" + id, update: new Date().getTime(), count: undefined,
-		recentList: new Array(), hotList: new Array()
+		recentList: null, hotList: null
 	};
 	let cont = fetchComment(typ, id, 20);
+	if (!cont || !cont.pagingVO)
+		return null;
 	en.count = cont.pagingVO.count;
 	en.recentList = parseComment(cont.commentList);
 	if (!lim) {
 		lim = 3;
-		(en.count > 1000) && (lim = 10);
-		(en.count > 600) && (lim = 8);
-		(en.count > 300) && (lim = 6);
-		(en.count > 100) && (lim = 4);
+		(en.count >= 1000) && (lim = 10);
+		(en.count >= 600) && (lim = 8);
+		(en.count >= 300) && (lim = 6);
+		(en.count >= 100) && (lim = 4);
 	}
 	cont = fetchComment(typ, id, -Math.abs(lim)).hotList;
 	en.hotList = parseComment(cont);
@@ -69,7 +70,7 @@ function parseSong(dat, f) {
 		Object.assign(en, {
 			singers: new Array(), staff: new Array(),
 			playCount: cont.playCount, collectCount: cont.favCount, commentCount: undefined,
-			info: new Array(), lyrics: undefined, styles: new Array(), tags: new Array()
+			info: new Array(), styles: new Array(), tags: new Array(), lyrics: undefined
 		});
 		let f = (en.playCount >= 20000 || en.favCount >= 100);
 		cont = dat.songExt;
@@ -105,7 +106,7 @@ function parseSong(dat, f) {
 
 function parseCollect(dat) {
 	(typeof dat == "string") && (dat = JSON.parse(dat));
-	if (!dat.listId)
+	if (!dat || !dat.listId)
 		return null;
 	let en = {
 		id: dat.listId, update: new Date().getTime(), name: dat.collectName,
@@ -136,6 +137,8 @@ function parseCollect(dat) {
 
 function parseComment(dat) {
 	(typeof dat == "string") && (dat = JSON.parse(dat));
+	if (!dat)
+		return null;
 	let cont = new Array();
 	for (let cmnt of dat) {
 		let en = {

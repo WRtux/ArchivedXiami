@@ -23,8 +23,7 @@ function captureCollect(str) {
 	let dat = JSON.parse(str).resultObj;
 	let en = dat && parseCollect(dat);
 	if (en) {
-		inflateComment("collect", this.id);
-		en.commentSid = "collect-" + this.id;
+		en.commentSid = inflateComment("collect", this.id) ? "collect-" + this.id : null;
 		data.push(en);
 		queue.status.mergeCount++;
 	} else
