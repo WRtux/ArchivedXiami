@@ -5,12 +5,13 @@ Very few data of dying [xiami.com](https://www.xiami.com/), archived for memoria
 
 ## Browse data
 
-Data are stored as JSON in `/archive/`.
+Data are provided as PPMd compressed files in the release page and `/archive/` (partial).
 
 * `pool.json`: data pool for detailed artists, albums, songs and comments data.
 * `genre.json`: archive of the main pages in the genre and style section.
+* `collect.json`: detailed data of some popular collections.
 
-Tools may be needed to browse some huge JSON files.
+Tools may be needed to decompress and browse some huge JSON files.
 
 ## Begin capture
 
