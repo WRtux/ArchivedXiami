@@ -1,5 +1,54 @@
 "use strict";
 
+function inflateArtists() {
+	if (arguments[0]) {
+		if (this.type != "albums") {
+			let en = parseArtist(JSON.parse(arguments[0]).result.data.artistDetailVO);
+			if (en) {
+				en.commentSid = inflateComment("artist", this.sid) ? "artist-" + this.sid : null;
+				pool.artists.inflate(en);
+				queue.status.iterateCount++;
+				let o = { artistId: this.sid, category: 0, pagingVO: { page: 1, pageSize: 10 } };
+				(en.playCount >= 200000) && (o.pagingVO.pageSize = 30);
+				(en.playCount >= 20000) && (o.pagingVO.pageSize = 20);
+				queue[0].url = buildRequestURL("/api/album/getArtistAlbums", o);
+			} else
+				queue.shift();
+		} else {
+			let cont = JSON.parse(arguments[0]).result.data;
+			if (!cont || !cont.pagingVO)
+				return;
+			let en = pool.artists.get(this.sid);
+			en.albumCount = cont.pagingVO.count;
+			en.albums = new Array();
+			for (let alb of cont.albums) {
+				en.albums.push({
+					id: alb.albumId, sid: alb.albumStringId, name: alb.albumName,
+					category: alb.categoryId, songCount: alb.songCount,
+					playCount: alb.playCount, grade: Math.round(alb.grade * 10) || null
+				});
+				parseAlbum(alb, true);
+			}
+		}
+		return;
+	}
+	for (let [k, v] of pool.artists) {
+		if (v.weight && v.weight <= 10) {
+			let func = () => buildRequestURL("/api/artist/getArtistDetail", { artistId: k });
+			let ref = v.referrer || base.artist + k;
+			queue.push({
+				mode: "request", builder: func, referrer: ref, callback: inflateArtists,
+				type: "artist", sid: k
+			});
+			queue.push({
+				mode: "request", referrer: ref, callback: inflateArtists,
+				type: "albums", sid: k
+			});
+		}
+	}
+	window.setTimeout(startQueue);
+}
+
 function inflateSongs() {
 	if (arguments[0]) {
 		let en = parseSong(JSON.parse(arguments[0]).result.data, false);
@@ -45,6 +94,56 @@ function inflateComment(typ, id, lim) {
 	pool.comments.inflate(en);
 	queue.status.mergeCount += 2;
 	queue.status.iterateCount++;
+	return en;
+}
+
+function parseArtist(dat) {
+	(typeof dat == "string") && (dat = JSON.parse(dat));
+	if (!dat || !dat.artistId)
+		return null;
+	let en = {
+		id: dat.artistId, sid: dat.artistStringId, update: new Date().getTime(), name: dat.artistName,
+		subName: dat.alias || null, logo: dat.artistLogo, description: dat.description,
+		category: dat.categoryId, area: dat.area || null, gender: dat.gender, birthday: dat.birthday,
+		playCount: dat.playCount, collectCount: dat.countLikes, commentCount: dat.comments,
+		roles: new Array(), styles: new Array()
+	};
+	for (let o of dat.roles || "")
+		en.roles.push(o.name);
+	for (let o of dat.styles || "")
+		en.styles.push({ id: o.styleId, name: o.styleName });
+	if (pool.artists.inflate(en))
+		queue.status.mergeCount++;
+	queue.status.queryCount++;
+	return en;
+}
+
+function parseAlbum(dat, f) {
+	(typeof dat == "string") && (dat = JSON.parse(dat));
+	if (!dat || !dat.albumId)
+		return null;
+	let en = {
+		id: dat.albumId, sid: dat.albumStringId, update: new Date().getTime(), name: dat.albumName,
+		subName: dat.subName || null, logo: dat.albumLogo,
+		category: dat.categoryId, grade: Math.round(dat.grade * 10) || null, language: dat.language,
+		artist: null, company: { id: dat.companyId, name: dat.comapny },
+		publishTime: dat.gmtPublish
+	};
+	let ref = base.album + en.sid;
+	let o = (dat.artists || "")[0];
+	o && (en.artist = { id: o.artistId, sid: o.artistStringId, name: o.artistName });
+	o && pool.artists.weigh({ sid: o.artistStringId, referrer: ref, name: o.artistName, weight: 3 });
+	if (!f) {
+		Object.assign(en, {
+			description: dat.description,
+			songs: new Array()
+		});
+		//TODO
+	}
+	f && (en.weight = 10);
+	if (pool.albums.inflate(en))
+		queue.status.mergeCount++;
+	queue.status.queryCount++;
 	return en;
 }
 

@@ -12,8 +12,13 @@ base.oldGenreExp = new RegExp("/genre/detail/(?:gid/|sid/)" + "([0-9A-Za-z]+)");
 
 function clearCookie() {
 	let li = document.cookie.match(/[^;\s]+(?==)/g);
-	for (let k of li)
-		document.cookie = k + "=; expires=" + new Date(0).toUTCString();
+	for (let k of li) {
+		let str = k + "=; path=/; expires=" + new Date(0).toUTCString();
+		document.cookie = str;
+		document.cookie = str + "; domain=www.xiami.com";
+		document.cookie = str + "; domain=xiami.com";
+		document.cookie = str + "; domain=g.alicdn.com";
+	}
 }
 
 function downloadJSON(o) {
