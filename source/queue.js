@@ -1,6 +1,12 @@
 "use strict";
 var queue = [];
-queue.status = { start: null, update: null, task: null, iterateCount: 0, queryCount: 0, mergeCount: 0 };
+queue.status = {
+	start: null, update: null, task: null,
+	iterateCount: 0, queryCount: 0, mergeCount: 0, cook: 0
+};
+queue.config = {
+	interval: 1000, recookMod: 2
+};
 var data = undefined;
 
 function startQueue(tsk) {
@@ -27,7 +33,8 @@ function proceedQueue() {
 	if (queue.length > 0) {
 		let tsk = queue.shift();
 		queue.status.task = tsk;
-		tsk.recook && recook();
+		tsk.recook && queue.status.cook++;
+		(queue.status.cook % queue.config.recookMod == 0) && recook();
 		tsk.builder && (tsk.url = tsk.builder());
 		fakeNavigate(tsk.mode, tsk.url, tsk.referrer, function (doc) {
 			try {
@@ -39,7 +46,7 @@ function proceedQueue() {
 			}
 			queue.status.task = null;
 			queue.status.update = new Date();
-			setTimeout(proceedQueue, 1000);
+			setTimeout(proceedQueue, queue.config.interval);
 		});
 	} else {
 		if (data && Object.keys(data).length > 0) {
