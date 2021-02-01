@@ -5,7 +5,8 @@ queue.status = {
 	iterateCount: 0, queryCount: 0, mergeCount: 0, cook: 0
 };
 queue.config = {
-	interval: 1000, recookMod: 2
+	interval: 1000, recookMod: 2,
+	autoRestart: false
 };
 var data = undefined;
 
@@ -13,6 +14,7 @@ function startQueue(tsk) {
 	queue.status.start = new Date();
 	tsk && queue.unshift(tsk);
 	proceedQueue();
+	console.log("Queue started.");
 }
 
 function pauseQueue(f) {
@@ -25,6 +27,7 @@ function pauseQueue(f) {
 		}
 	}
 	queue.status.start = null;
+	queue.config.autoRestart && setTimeout(startQueue, queue.config.interval * 3);
 }
 
 function proceedQueue() {
@@ -33,8 +36,10 @@ function proceedQueue() {
 	if (queue.length > 0) {
 		let tsk = queue.shift();
 		queue.status.task = tsk;
-		tsk.recook && queue.status.cook++;
-		(queue.status.cook % queue.config.recookMod == 0) && recook();
+		if (tsk.recook) {
+			queue.status.cook++;
+			(queue.status.cook % queue.config.recookMod == 0) && recook();
+		}
 		tsk.builder && (tsk.url = tsk.builder());
 		fakeNavigate(tsk.mode, tsk.url, tsk.referrer, function (doc) {
 			try {
@@ -47,7 +52,7 @@ function proceedQueue() {
 			queue.status.task = null;
 			queue.status.update = new Date();
 			setTimeout(proceedQueue, queue.config.interval);
-		});
+		}, pauseQueue.bind(undefined, true));
 	} else {
 		if (data && Object.keys(data).length > 0) {
 			downloadJSON(data);
@@ -60,12 +65,13 @@ function proceedQueue() {
 
 function recook() {
 	clearCookie();
+	document.cookie = "xmgid=" + Math.floor(Math.random() * 10000) + "; domain=xiami.com; path=/";
 	let xhr = new XMLHttpRequest();
 	xhr.open("GET", "/api/comment/getCommentList", false);
 	xhr.send();
 }
 
-function fakeNavigate(m, url, ref, func) {
+function fakeNavigate(m, url, ref, hndl, err) {
 	let wnd = window;
 	if (ref && frame.contentDocument) {
 		wnd = frame.contentWindow;
@@ -77,8 +83,12 @@ function fakeNavigate(m, url, ref, func) {
 		else
 			frame.src = url;
 		frame.onload = function () {
-			func(this.contentDocument);
-			this.onload = null;
+			this.onload = this.onerror = null;
+			hndl(this.contentDocument);
+		};
+		frame.onerror = function () {
+			this.onload = this.onerror = null;
+			err();
 		};
 	} else {
 		let xhr = new wnd.XMLHttpRequest();
@@ -86,11 +96,11 @@ function fakeNavigate(m, url, ref, func) {
 		if (m == "ajax")
 			xhr.responseType = "document";
 		xhr.send();
-		xhr.onload = () => func(xhr.response);
+		xhr.onload = () => hndl(xhr.response);
 		xhr.onerror = function () {
 			this.open("GET", url, true);
 			setTimeout(this.send.bind(this), 1000);
-			this.onerror = () => console.error("Timeout");
+			this.onerror = err;
 		};
 	}
 }
