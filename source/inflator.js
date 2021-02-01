@@ -37,12 +37,12 @@ function inflateArtists() {
 			let func = () => buildRequestURL("/api/artist/getArtistDetail", { artistId: k });
 			let ref = v.referrer || base.artist + k;
 			queue.push({
-				mode: "request", builder: func, referrer: ref, callback: inflateArtists,
-				type: "artist", sid: k
+				mode: "request", builder: func, referrer: ref, recook: true,
+				callback: inflateArtists, type: "artist", sid: k
 			});
 			queue.push({
-				mode: "request", referrer: ref, callback: inflateArtists,
-				type: "albums", sid: k
+				mode: "request", url: null, referrer: ref,
+				callback: inflateArtists, type: "albums", sid: k
 			});
 		}
 	}
@@ -64,8 +64,8 @@ function inflateSongs() {
 			let func = () => buildRequestURL("/api/song/initialize", { songId: k });
 			let ref = v.referrer || base.song + k;
 			queue.push({
-				mode: "request", builder: func, referrer: ref, callback: inflateSongs,
-				type: "song", sid: k
+				mode: "request", builder: func, referrer: ref, recook: true,
+				callback: inflateSongs, type: "song", sid: k
 			});
 		}
 	}

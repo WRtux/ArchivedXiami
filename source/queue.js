@@ -27,6 +27,7 @@ function proceedQueue() {
 	if (queue.length > 0) {
 		let tsk = queue.shift();
 		queue.status.task = tsk;
+		tsk.recook && recook();
 		tsk.builder && (tsk.url = tsk.builder());
 		fakeNavigate(tsk.mode, tsk.url, tsk.referrer, function (doc) {
 			try {
@@ -48,6 +49,13 @@ function proceedQueue() {
 		}
 		queue.status.start = null;
 	}
+}
+
+function recook() {
+	clearCookie();
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", "/api/comment/getCommentList", false);
+	xhr.send();
 }
 
 function fakeNavigate(m, url, ref, func) {
@@ -75,6 +83,7 @@ function fakeNavigate(m, url, ref, func) {
 		xhr.onerror = function () {
 			this.open("GET", url, true);
 			setTimeout(this.send.bind(this), 1000);
+			this.onerror = () => console.error("Timeout");
 		};
 	}
 }
