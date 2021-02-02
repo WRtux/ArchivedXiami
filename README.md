@@ -3,6 +3,8 @@
 Very few data of dying [xiami.com](https://www.xiami.com/), archived for memorial purpose.  
 即将归于虚无的[虾米音乐](https://www.xiami.com/)之沧海一粟。
 
+> Due to the shortage of time and machines, most capture plans has been abandoned. Comments are the main subject.
+
 ## Browse data
 
 Data are provided as PPMd compressed files in the release page and `/archive/` (partial).
