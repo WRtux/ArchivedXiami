@@ -126,6 +126,7 @@ function parseAlbum(dat, f) {
 		id: dat.albumId, sid: dat.albumStringId, update: new Date().getTime(), name: dat.albumName,
 		subName: dat.subName || null, logo: dat.albumLogo,
 		category: dat.categoryId, grade: Math.round(dat.grade * 10) || null, language: dat.language,
+		discCount: dat.cdCount, songCount: dat.songCount,
 		artist: null, company: { id: dat.companyId, name: dat.comapny },
 		publishTime: dat.gmtPublish
 	};
@@ -134,11 +135,23 @@ function parseAlbum(dat, f) {
 	o && (en.artist = { id: o.artistId, sid: o.artistStringId, name: o.artistName });
 	o && pool.artists.weigh({ sid: o.artistStringId, referrer: ref, name: o.artistName, weight: 3 });
 	if (!f) {
+		o && (en.artist.logo = o.artistLogo);
 		Object.assign(en, {
 			description: dat.description,
-			songs: new Array()
+			playCount: dat.playCount, collectCount: dat.collects, commentCount: dat.comments,
+			styles: new Array(), songs: new Array()
 		});
-		//TODO
+		for (let o of dat.styles || "")
+			en.styles.push({ id: o.styleId, name: o.styleName });
+		for (let sng of dat.songs) {
+			en.songs.push({
+				id: sng.songId, sid: sng.songStringId, name: sng.songName,
+				length: sng.length,
+				artistSid: sng.artistVOs && sng.artistVOs[0].artistStringId, artistName: sng.artistName,
+				albumSid: sng.albumStringId, albumName: sng.albumName
+			});
+			parseSong(sng, true);
+		}
 	}
 	f && (en.weight = 10);
 	if (pool.albums.inflate(en))
@@ -154,7 +167,8 @@ function parseSong(dat, f) {
 		return null;
 	let en = {
 		id: cont.songId, sid: cont.songStringId, update: new Date().getTime(), name: cont.songName,
-		subName: cont.newSubName || cont.subName || null, track: cont.track, length: cont.length,
+		subName: cont.newSubName || cont.subName || null,
+		disc: cont.cdSerial, track: cont.track, length: cont.length,
 		artist: null, album: null
 	};
 	let ref = base.song + en.sid;
@@ -174,7 +188,7 @@ function parseSong(dat, f) {
 		let f = (en.playCount >= 20000 || en.favCount >= 100);
 		cont = dat.songExt;
 		en.commentCount = cont.commentCount;
-		for (o of cont.singerVOs || "") {
+		for (let o of cont.singerVOs || "") {
 			en.singers.push({ id: o.artistId, sid: o.artistStringId, name: o.artistName });
 			pool.artists.weigh({ sid: o.artistStringId, referrer: ref, name: o.artistName, weight: 2 });
 		}
@@ -184,15 +198,15 @@ function parseSong(dat, f) {
 				typen.staff.push({ id: o.id, name: o.name });
 			en.staff.push(typen);
 		}
-		for (o of cont.songDescs || "")
+		for (let o of cont.songDescs || "")
 			en.info.push({ name: o.title, description: o.desc });
-		for (o of cont.styles || "")
+		for (let o of cont.styles || "")
 			en.styles.push({ id: o.styleId, name: o.styleName });
-		for (o of cont.songTag.tags || "")
+		for (let o of cont.songTag.tags || "")
 			en.tags.push({ sid: o.id, name: o.name });
 		if (f) {
 			en.lyrics = new Array();
-			for (o of dat.songLyric || "")
+			for (let o of dat.songLyric || "")
 				en.lyrics.push({ id: o.id, content: o.content });
 		}
 	}
@@ -213,7 +227,7 @@ function parseCollect(dat) {
 		user: null,
 		createTime: dat.gmtCreate, modifyTime: dat.gmtModify,
 		playCount: dat.playCount, collectCount: dat.collects, commentCount: dat.comments,
-		songs: new Array(), commentSid: null
+		songs: new Array()
 	};
 	dat.user && (en.user = { id: dat.user.userId, name: dat.user.nickName, avatar: dat.user.avatar });
 	for (let i = 0; i < dat.songCount; i++) {

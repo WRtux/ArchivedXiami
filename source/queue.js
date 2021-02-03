@@ -27,7 +27,7 @@ function pauseQueue(f) {
 		}
 	}
 	queue.status.start = null;
-	queue.config.autoRestart && setTimeout(startQueue, queue.config.interval * 3);
+	queue.config.autoRestart && setTimeout(startQueue, 20000 + queue.config.interval);
 }
 
 function proceedQueue() {
@@ -67,7 +67,7 @@ function recook() {
 	clearCookie();
 	document.cookie = "xmgid=" + Math.floor(Math.random() * 10000) + "; domain=xiami.com; path=/";
 	let xhr = new XMLHttpRequest();
-	xhr.open("GET", "/api/comment/getCommentList", false);
+	xhr.open("GET", "/api/collect/getCollectStaticUrl?_q=&_s=", false);
 	xhr.send();
 }
 
