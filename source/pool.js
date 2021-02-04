@@ -66,3 +66,27 @@ function savePool() {
 	}
 	downloadJSON(dat);
 }
+
+function sliceMedia() {
+	let map = new Map();
+	let func = (k) => map.set((k.match(/^https?:(.*)/) || "")[1] || k);
+	for (let [, en] of pool.artists)
+		en.logo && func(en.logo);
+	for (let [, en] of pool.albums) {
+		en.logo && func(en.logo);
+		en.artist && en.artist.logo && func(en.artist.logo);
+	}
+	for (let [, en] of pool.songs) {
+		en.album.logo && func(en.album.logo);
+		en.artist && en.artist.logo && func(en.artist.logo);
+	}
+	for (let [, en] of pool.comments) {
+		en.user.avatar && func(en.user.avatar);
+		for (let rep of en.replies || "")
+			rep.user.avatar && func(rep.user.avatar);
+	}
+	let li = new Array();
+	for (let [k, ] of map)
+		li.push(k);
+	return li;
+}
