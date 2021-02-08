@@ -1,9 +1,7 @@
 # ArchivedXiami
 
-Very few data of dying [xiami.com](https://www.xiami.com/), archived for memorial purpose.  
-即将归于虚无的[虾米音乐](https://www.xiami.com/)之沧海一粟。
-
-> Due to the shortage of time and machines, most capture plans has been abandoned. Comments are the main subject.
+Very few data of departed xiami.com, archived for memorial purpose.  
+已然逝去的虾米音乐之沧海一粟。
 
 ## Browse data
 
@@ -16,6 +14,9 @@ Data are provided as PPMd compressed files in the release page and `/archive/` (
 Tools may be needed to decompress and browse some huge JSON files.
 
 ## Begin capture
+
+> The death of xiami.com was confirmed at around 15:35:30, Feb 7, 2021 (UTC+8). All capture work has stopped.  
+> Raw data processing is still in progress and will be uploaded in the following days.
 
 Scripts are in `/source/`.
 
