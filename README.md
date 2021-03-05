@@ -3,7 +3,10 @@
 Very few data of departed xiami.com, archived for memorial purpose.  
 已然逝去的虾米音乐之沧海一粟。
 
-## Browse data
+## Archived data
+
+> The death of xiami.com was confirmed at around 15:35:30, Feb 7, 2021 (UTC+8). All capture work has stopped.  
+> Raw data processing is still in progress and will be uploaded in the following days.
 
 Data are provided as PPMd compressed files in the release page and `/archive/` (partial).
 
@@ -13,11 +16,11 @@ Data are provided as PPMd compressed files in the release page and `/archive/` (
 
 Tools may be needed to decompress and browse some huge JSON files.
 
-## Begin capture
+## Source
 
-> The death of xiami.com was confirmed at around 15:35:30, Feb 7, 2021 (UTC+8). All capture work has stopped.  
-> Raw data processing is still in progress and will be uploaded in the following days.
+Sources of all related projects are in `/source/`.
 
-Scripts are in `/source/`.
-
-Copy the plain HTML code in `/source/standalone/template.html`, open a page in [xiami.com](https://www.xiami.com/list) and enter ``javascript:`<paste here>` `` in the navigation bar of the page to create a workspace for capturing.
+* `webapi/`
+* `aftermath/`
+* `parser/`
+* `viewer/`
