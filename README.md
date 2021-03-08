@@ -1,11 +1,11 @@
 # ArchivedXiami
 
-Very few data of departed xiami.com, archived for memorial purpose.  
+Very few data of departed Xiami Music, archived for memorial purpose.  
 已然逝去的虾米音乐之沧海一粟。
 
 ## Archived data
 
-> The death of xiami.com was confirmed at around 15:35:30, Feb 7, 2021 (UTC+8). All capture work has stopped.  
+> The death of Xiami Music was confirmed at around 15:35:30, Feb 7, 2021 (UTC+8). All capture work has stopped.  
 > Raw data processing is still in progress and will be uploaded in the following days.
 
 Data are provided as PPMd compressed files in the release page and `/archive/` (partial).
@@ -18,9 +18,10 @@ Tools may be needed to decompress and browse some huge JSON files.
 
 ## Source
 
-Sources of all related projects are in `/source/`.
+The sources used in different stages are in `/source/`.
 
-* `webapi/`
-* `aftermath/`
-* `parser/`
-* `viewer/`
+* `webapi/`: scripts to capture data in a browser.
+* `aftermath/`: batches to download unprocessed HTML and media files, even after Feb 5.
+* `parser/`: tools to extract data from HTML and process all captured data.
+
+New project [FrozenXiami](/WRtux/FrozenXiami) has been launched to provide an interface similar to Xiami.
