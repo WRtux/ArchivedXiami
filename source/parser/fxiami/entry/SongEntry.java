@@ -3,6 +3,8 @@ package fxiami.entry;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class SongEntry extends Entry {
 	
 	protected static final Map<Long, SongEntry> idEntryMap = new HashMap<>();
@@ -16,9 +18,29 @@ public class SongEntry extends Entry {
 		return sidEntryMap.get(sid);
 	}
 	
-	public static SongEntry matchEntry(Long id, String sid) {
-		SongEntry[] ens = {getEntry(id), getEntry(sid)};
+	public static SongEntry getExactEntry(Long id, String sid) {
+		SongEntry[] ens = {idEntryMap.get(id), sidEntryMap.get(sid)};
+		SongEntry en;
 		if (ens[0] == ens[1]) {
+			en = ens[1];
+		} else {
+			if (ens[0] == null) {
+				en = ens[1];
+			} else if (ens[1] == null) {
+				en = ens[0];
+			} else {
+				System.err.printf("Mismatch for id: %d, sid: %s.%n", id, sid);
+				en = null;
+			}
+		}
+		return (en != null && !en.dummy) ? en : null;
+	}
+	
+	public static SongEntry matchEntry(Long id, String sid) {
+		SongEntry[] ens = {idEntryMap.get(id), sidEntryMap.get(sid)};
+		if (ens[0] == ens[1]) {
+			if (ens[1] == null)
+				ens[1] = new SongEntry(id, sid, true);
 			return ens[1];
 		} else {
 			if (ens[0] == null) {
@@ -32,16 +54,43 @@ public class SongEntry extends Entry {
 		}
 	}
 	
-	public ArtistEntry artist;
+	public ReferenceEntry artist;
 	
-	public AlbumEntry album;
+	public ReferenceEntry album;
 	
+	public Long disc;
+	public Long track;
+	
+	public Long length;
+	
+	public Long playCount;
+	public Long likeCount;
+	
+	protected SongEntry(Long id, String sid, boolean dummy) {
+		super(id, sid, dummy);
+		if (!dummy) {
+			if (id != null && id != Entry.NULL_INTEGER)
+				idEntryMap.put(id, this);
+			if (sid != null && sid != Entry.NULL_STRING)
+				sidEntryMap.put(sid, this);
+		}
+	}
 	public SongEntry(Long id, String sid) {
-		super(id, sid);
-		if (id != null && id != Entry.NULL_INTEGER)
-			idEntryMap.put(id, this);
-		if (sid != null && sid != Entry.NULL_STRING)
-			sidEntryMap.put(sid, this);
+		this(id, sid, false);
+	}
+	
+	@Override
+	public JSONObject toJSON() {
+		JSONObject o = super.toJSON();
+		Helper.putValidEntry(o, "artistId", "artistSid", this.artist);
+		Helper.putValidEntry(o, "albumId", "albumSid", this.album);
+		Helper.putValidInteger(o, "disc", this.disc);
+		Helper.putValidInteger(o, "track", this.track);
+		Helper.putValidInteger(o, "length", this.length);
+		Helper.putValidInteger(o, "playCount", this.playCount);
+		Helper.putValidInteger(o, "likeCount", this.likeCount);
+		//TODO
+		return o;
 	}
 	
 }

@@ -16,9 +16,29 @@ public class AlbumEntry extends Entry {
 		return sidEntryMap.get(sid);
 	}
 	
-	public static AlbumEntry matchEntry(Long id, String sid) {
-		AlbumEntry[] ens = {getEntry(id), getEntry(sid)};
+	public static AlbumEntry getExactEntry(Long id, String sid) {
+		AlbumEntry[] ens = {idEntryMap.get(id), sidEntryMap.get(sid)};
+		AlbumEntry en;
 		if (ens[0] == ens[1]) {
+			en = ens[1];
+		} else {
+			if (ens[0] == null) {
+				en = ens[1];
+			} else if (ens[1] == null) {
+				en = ens[0];
+			} else {
+				System.err.printf("Mismatch for id: %d, sid: %s.%n", id, sid);
+				en = null;
+			}
+		}
+		return (en != null && !en.dummy) ? en : null;
+	}
+	
+	public static AlbumEntry matchEntry(Long id, String sid) {
+		AlbumEntry[] ens = {idEntryMap.get(id), sidEntryMap.get(sid)};
+		if (ens[0] == ens[1]) {
+			if (ens[1] == null)
+				ens[1] = new AlbumEntry(id, sid, true);
 			return ens[1];
 		} else {
 			if (ens[0] == null) {
@@ -32,14 +52,19 @@ public class AlbumEntry extends Entry {
 		}
 	}
 	
-	public ArtistEntry artist;
+	public ReferenceEntry artist;
 	
+	protected AlbumEntry(Long id, String sid, boolean dummy) {
+		super(id, sid, dummy);
+		if (!dummy) {
+			if (id != null && id != Entry.NULL_INTEGER)
+				idEntryMap.put(id, this);
+			if (sid != null && sid != Entry.NULL_STRING)
+				sidEntryMap.put(sid, this);
+		}
+	}
 	public AlbumEntry(Long id, String sid) {
-		super(id, sid);
-		if (id != null && id != Entry.NULL_INTEGER)
-			idEntryMap.put(id, this);
-		if (sid != null && sid != Entry.NULL_STRING)
-			sidEntryMap.put(sid, this);
+		this(id, sid, false);
 	}
 	
 }

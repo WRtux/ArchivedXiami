@@ -1,5 +1,7 @@
 package fxiami.entry;
 
+import com.alibaba.fastjson.JSONObject;
+
 public abstract class Entry {
 	
 	public static final Long NULL_INTEGER = new Long(0x80000000_00000000L);
@@ -24,11 +26,25 @@ public abstract class Entry {
 	public final Long id;
 	public final String sid;
 	
+	protected boolean dummy;
+	
 	public String name;
 	
-	public Entry(Long id, String sid) {
+	public Long update;
+	
+	protected Entry(Long id, String sid, boolean dummy) {
 		this.id = id;
 		this.sid = sid;
+		this.dummy = dummy;
+	}
+	
+	public JSONObject toJSON() {
+		JSONObject o = new JSONObject(true);
+		Helper.putValidInteger(o, "id", this.id);
+		Helper.putValidString(o, "sid", this.sid);
+		Helper.putValidString(o, "name", this.name);
+		o.put("update", this.update);
+		return o;
 	}
 	
 }

@@ -67,35 +67,49 @@ public final class Helper {
 		}
 	}
 	
-	public static boolean putValidInteger(Number num, JSONObject dest, String k) {
+	public static ReferenceEntry parseValidEntry(JSONObject o, String idk, String sidk) {
+		ReferenceEntry ren = null;
+		try {
+			Long id = o.getLong(idk);
+			String sid = o.getString(sidk);
+			if (id != null || sid != null)
+				ren = new ReferenceEntry(id, sid);
+		} catch (RuntimeException ex) {
+			System.err.printf("Not a valid entry: %s, %s%n",
+				String.valueOf(o.get(idk)), String.valueOf(o.get(sidk)));
+		}
+		return ren;
+	}
+	
+	public static boolean putValidInteger(JSONObject dest, String k, Number num) {
 		if (num == null)
 			return false;
 		dest.put(k, num != Entry.NULL_INTEGER ? num.longValue() : null);
 		return true;
 	}
 	
-	public static boolean putValidFloat(Number num, JSONObject dest, String k) {
+	public static boolean putValidFloat(JSONObject dest, String k, Number num) {
 		if (num == null)
 			return false;
 		dest.put(k, num != Entry.NULL_FLOAT ? num.doubleValue() : null);
 		return true;
 	}
 	
-	public static boolean putValidString(String str, JSONObject dest, String k) {
+	public static boolean putValidString(JSONObject dest, String k, String str) {
 		if (str == null)
 			return false;
 		dest.put(k, str != Entry.NULL_STRING ? str : null);
 		return true;
 	}
 	
-	public static boolean putValidArray(Object[] arr, JSONObject dest, String k) {
+	public static boolean putValidArray(JSONObject dest, String k, Object[] arr) {
 		if (arr == null)
 			return false;
 		dest.put(k, arr != Entry.NULL_ARRAY ? arr : null);
 		return true;
 	}
 	
-	public static boolean putNonNullArray(Object[] arr, JSONObject dest, String k) {
+	public static boolean putNonNullArray(JSONObject dest, String k, Object[] arr) {
 		if (arr != null) {
 			dest.put(k, arr != Entry.NULL_ARRAY ? arr : null);
 			return arr != Entry.NULL_ARRAY;
@@ -103,6 +117,14 @@ public final class Helper {
 			dest.put(k, null);
 			return false;
 		}
+	}
+	
+	public static boolean putValidEntry(JSONObject dest, String idk, String sidk, ReferenceEntry ren) {
+		if (ren == null)
+			return false;
+		dest.put(idk, ren.id);
+		dest.put(sidk, ren.sid);
+		return true;
 	}
 	
 	@Deprecated
