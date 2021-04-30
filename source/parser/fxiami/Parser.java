@@ -13,20 +13,59 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import fxiami.entry.AlbumEntry;
+import fxiami.entry.ArtistEntry;
 import fxiami.entry.Entry;
 import fxiami.entry.Helper;
 import fxiami.entry.SongEntry;
 
 public final class Parser {
 	
+	public static ArtistEntry parseArtistEntry(String dat) {
+		JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("artistDetail");
+		if (cont == null || cont.size() == 0)
+			return null;
+		ArtistEntry en = new ArtistEntry(cont.getLong("artistId"), cont.getString("artistStringId"));
+		//TODO
+		return en;
+	}
+	
+	public static AlbumEntry parseAlbumEntry(String dat) {
+		JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("albumDetail");
+		if (cont == null || cont.size() == 0)
+			return null;
+		AlbumEntry en = new AlbumEntry(cont.getLong("albumId"), cont.getString("albumStringId"));
+		//TODO
+		return en;
+	}
+	
 	public static SongEntry parseSongEntry(String dat) {
 		JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("songDetail");
-		if (cont == null)
+		if (cont == null || cont.size() == 0)
 			return null;
-		SongEntry en = new SongEntry(
-			Helper.parseValidInteger(cont, "songId"), Helper.parseValidString(cont, "songStringId"));
+		SongEntry en = new SongEntry(cont.getLong("songId"), cont.getString("songStringId"));
 		en.update = o.getLong("update");
 		en.name = Helper.parseValidString(cont, "songName");
+		en.subName = Helper.parseValidString(cont, "newSubName");
+		if (en.subName == null || en.subName == Entry.NULL_STRING)
+			en.subName = Helper.parseValidString(cont, "subName");
+		JSONArray arr = cont.getJSONArray("artistVOs");
+		if (arr != null && arr.size() > 0) {
+			en.artist = Helper.parseValidEntry(arr.getJSONObject(0), "artistId", "artistStringId");
+			en.artist.name = Helper.parseValidString(arr.getJSONObject(0), "artistName");
+			if (arr.size() > 1)
+				System.err.println("Multiple artists: " + arr.size());
+		}
+		en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId");
+		en.album.name = Helper.parseValidString(cont, "albumName");
+		en.disc = Helper.parseValidInteger(cont, "cdSerial");
+		en.track = Helper.parseValidInteger(cont, "track");
+		en.length = Helper.parseValidInteger(cont, "length");
+		en.playCount = Helper.parseValidInteger(cont, "playCount");
+		en.likeCount = Helper.parseValidInteger(cont, "favCount");
+		cont = o.getJSONObject("songExt");
+		if (cont == null)
+			return en;
 		//TODO
 		return en;
 	}
@@ -34,9 +73,9 @@ public final class Parser {
 	public static Entry parseEntry(String typ, String dat) {
 		switch (typ) {//TODO
 		case "artist":
-			return null;
+			return parseArtistEntry(dat);
 		case "album":
-			return null;
+			return parseAlbumEntry(dat);
 		case "song":
 			return parseSongEntry(dat);
 		default:
