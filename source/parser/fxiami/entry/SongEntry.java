@@ -54,6 +54,8 @@ public class SongEntry extends Entry {
 		}
 	}
 	
+	public String subName;
+	
 	public ReferenceEntry artist;
 	
 	public ReferenceEntry album;
@@ -69,9 +71,9 @@ public class SongEntry extends Entry {
 	protected SongEntry(Long id, String sid, boolean dummy) {
 		super(id, sid, dummy);
 		if (!dummy) {
-			if (id != null && id != Entry.NULL_INTEGER)
+			if (this.id != null)
 				idEntryMap.put(id, this);
-			if (sid != null && sid != Entry.NULL_STRING)
+			if (this.sid != null)
 				sidEntryMap.put(sid, this);
 		}
 	}
@@ -82,8 +84,11 @@ public class SongEntry extends Entry {
 	@Override
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
-		Helper.putValidEntry(o, "artistId", "artistSid", this.artist);
-		Helper.putValidEntry(o, "albumId", "albumSid", this.album);
+		Helper.putValidString(o, "subName", this.subName);
+		if (this.artist != null)
+			o.put("artist", this.artist.toJSON());
+		if (this.album != null)
+			o.put("album", this.album.toJSON());
 		Helper.putValidInteger(o, "disc", this.disc);
 		Helper.putValidInteger(o, "track", this.track);
 		Helper.putValidInteger(o, "length", this.length);

@@ -52,14 +52,18 @@ public class AlbumEntry extends Entry {
 		}
 	}
 	
+	public String subName;
+	
+	public String logoURL;
+	
 	public ReferenceEntry artist;
 	
 	protected AlbumEntry(Long id, String sid, boolean dummy) {
 		super(id, sid, dummy);
 		if (!dummy) {
-			if (id != null && id != Entry.NULL_INTEGER)
+			if (this.id != null)
 				idEntryMap.put(id, this);
-			if (sid != null && sid != Entry.NULL_STRING)
+			if (this.sid != null)
 				sidEntryMap.put(sid, this);
 		}
 	}

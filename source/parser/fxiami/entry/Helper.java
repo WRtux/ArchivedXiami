@@ -1,5 +1,6 @@
 package fxiami.entry;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public final class Helper {
@@ -49,7 +50,9 @@ public final class Helper {
 			return null;
 		Object[] arr = null;
 		try {
-			arr = o.getJSONArray(k).toArray();
+			JSONArray cont = o.getJSONArray(k);
+			if (cont != null)
+				arr = cont.toArray();
 		} catch (RuntimeException ex) {
 			System.out.println("Not a valid array: " + String.valueOf(o.get(k)));
 		}
@@ -75,7 +78,7 @@ public final class Helper {
 			if (id != null || sid != null)
 				ren = new ReferenceEntry(id, sid);
 		} catch (RuntimeException ex) {
-			System.err.printf("Not a valid entry: %s, %s%n",
+			System.out.printf("Not a valid entry: %s, %s%n",
 				String.valueOf(o.get(idk)), String.valueOf(o.get(sidk)));
 		}
 		return ren;
@@ -119,12 +122,15 @@ public final class Helper {
 		}
 	}
 	
-	public static boolean putValidEntry(JSONObject dest, String idk, String sidk, ReferenceEntry ren) {
-		if (ren == null)
+	public static boolean putValidEntry(JSONObject dest, String idk, String sidk, Entry en) {
+		if (en == null)
 			return false;
-		dest.put(idk, ren.id);
-		dest.put(sidk, ren.sid);
+		dest.put(idk, en.id);
+		dest.put(sidk, en.sid);
 		return true;
+	}
+	public static boolean putValidEntry(JSONObject dest, Entry en) {
+		return putValidEntry(dest, "id", "sid", en);
 	}
 	
 	@Deprecated

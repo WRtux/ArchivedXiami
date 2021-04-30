@@ -26,24 +26,24 @@ public abstract class Entry {
 	public final Long id;
 	public final String sid;
 	
-	protected boolean dummy;
-	
-	public String name;
+	protected final boolean dummy;
 	
 	public Long update;
 	
+	public String name;
+	
 	protected Entry(Long id, String sid, boolean dummy) {
-		this.id = id;
-		this.sid = sid;
+		this.id = (id != Entry.NULL_INTEGER ? id : null);
+		this.sid = (sid != Entry.NULL_STRING ? sid : null);
 		this.dummy = dummy;
 	}
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject(true);
-		Helper.putValidInteger(o, "id", this.id);
-		Helper.putValidString(o, "sid", this.sid);
+		Helper.putValidEntry(o, this);
+		if (!this.dummy)
+			Helper.putValidInteger(o, "update", this.update);
 		Helper.putValidString(o, "name", this.name);
-		o.put("update", this.update);
 		return o;
 	}
 	
