@@ -44,11 +44,13 @@ public final class Parser {
 		if (cont == null || cont.size() == 0)
 			return null;
 		SongEntry en = new SongEntry(cont.getLong("songId"), cont.getString("songStringId"));
-		en.update = o.getLong("update");
+		en.update = Helper.parseValidInteger(o, "update");
 		en.name = Helper.parseValidString(cont, "songName");
 		en.subName = Helper.parseValidString(cont, "newSubName");
 		if (en.subName == null || en.subName == Entry.NULL_STRING)
 			en.subName = Helper.parseValidString(cont, "subName");
+		if (en.subName != null && en.subName.length() == 0)
+			en.subName = Entry.NULL_STRING;
 		JSONArray arr = cont.getJSONArray("artistVOs");
 		if (arr != null && arr.size() > 0) {
 			en.artist = Helper.parseValidEntry(arr.getJSONObject(0), "artistId", "artistStringId");
@@ -61,17 +63,20 @@ public final class Parser {
 		en.disc = Helper.parseValidInteger(cont, "cdSerial");
 		en.track = Helper.parseValidInteger(cont, "track");
 		en.length = Helper.parseValidInteger(cont, "length");
+		en.highlight = Helper.parseValidInteger(cont, "hotPartStartTime");
+		en.pace = Helper.parseValidInteger(cont, "pace");
 		en.playCount = Helper.parseValidInteger(cont, "playCount");
 		en.likeCount = Helper.parseValidInteger(cont, "favCount");
 		cont = o.getJSONObject("songExt");
 		if (cont == null)
 			return en;
+		en.tags = Helper.parseValidArray(cont.getJSONObject("songTag"), "tags", new String[0]);
 		//TODO
 		return en;
 	}
 	
 	public static Entry parseEntry(String typ, String dat) {
-		switch (typ) {//TODO
+		switch (typ) {
 		case "artist":
 			return parseArtistEntry(dat);
 		case "album":

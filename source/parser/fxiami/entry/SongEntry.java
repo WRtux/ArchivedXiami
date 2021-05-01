@@ -64,6 +64,11 @@ public class SongEntry extends Entry {
 	public Long track;
 	
 	public Long length;
+	public Long highlight;
+	
+	public Long pace;
+	
+	public String[] tags;
 	
 	public Long playCount;
 	public Long likeCount;
@@ -85,13 +90,14 @@ public class SongEntry extends Entry {
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
-		if (this.artist != null)
-			o.put("artist", this.artist.toJSON());
-		if (this.album != null)
-			o.put("album", this.album.toJSON());
+		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
+		o.put("album", this.album != null ? this.album.toJSON() : null);
 		Helper.putValidInteger(o, "disc", this.disc);
 		Helper.putValidInteger(o, "track", this.track);
 		Helper.putValidInteger(o, "length", this.length);
+		Helper.putValidInteger(o, "highlight", this.highlight);
+		Helper.putValidInteger(o, "pace", this.pace);
+		Helper.putValidArray(o, "tags", this.tags);
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);
 		//TODO

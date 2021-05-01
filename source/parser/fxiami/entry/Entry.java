@@ -1,14 +1,27 @@
 package fxiami.entry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSONObject;
 
 public abstract class Entry {
 	
+	public static final Map<Class<?>, Object> nullEntryMap = new HashMap<>();
+	
 	public static final Long NULL_INTEGER = new Long(0x80000000_00000000L);
 	public static final Double NULL_FLOAT = Double.longBitsToDouble(0xFFF80000_00000000L);
 	public static final String NULL_STRING = new String(new char[] {0});
+	public static final Object[] NULL_OBJECT_ARRAY = new Object[0];
 	
-	public static final Object[] NULL_ARRAY = new Void[0];
+	static {
+		nullEntryMap.put(Number.class, NULL_INTEGER);
+		nullEntryMap.put(Long.class, NULL_INTEGER);
+		nullEntryMap.put(Double.class, NULL_FLOAT);
+		nullEntryMap.put(String.class, NULL_STRING);
+		nullEntryMap.put(Object[].class, NULL_OBJECT_ARRAY);
+		nullEntryMap.put(String[].class, new String[0]);
+	}
 	
 	public static Class<? extends Entry> getEntryClass(String typ) {
 		switch (typ) {

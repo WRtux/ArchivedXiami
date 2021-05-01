@@ -1,5 +1,7 @@
 package fxiami.entry;
 
+import java.lang.reflect.Array;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -56,17 +58,28 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not a valid array: " + String.valueOf(o.get(k)));
 		}
-		return arr != null ? arr : Entry.NULL_ARRAY;
+		return arr != null ? arr : Entry.NULL_OBJECT_ARRAY;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T> T[] parseValidArray(JSONObject o, String k, T[] dest) {
 		if (!o.containsKey(k))
 			return null;
+		T[] arr = null;
 		try {
-			return o.getJSONArray(k).toArray(dest);
+			JSONArray cont = o.getJSONArray(k);
+			if (cont != null)
+				arr = cont.toArray(dest);
 		} catch (RuntimeException ex) {
 			System.out.println("Not a valid array: " + String.valueOf(o.get(k)));
-			return null;
+		}
+		if (arr != null) {
+			return arr;
+		} else {
+			Class<?> cls = dest.getClass();
+			if (!Entry.nullEntryMap.containsKey(cls))
+				Entry.nullEntryMap.put(cls, Array.newInstance(cls.getComponentType(), 0));
+			return (T[])Entry.nullEntryMap.get(cls);
 		}
 	}
 	
@@ -108,18 +121,12 @@ public final class Helper {
 	public static boolean putValidArray(JSONObject dest, String k, Object[] arr) {
 		if (arr == null)
 			return false;
-		dest.put(k, arr != Entry.NULL_ARRAY ? arr : null);
-		return true;
-	}
-	
-	public static boolean putNonNullArray(JSONObject dest, String k, Object[] arr) {
-		if (arr != null) {
-			dest.put(k, arr != Entry.NULL_ARRAY ? arr : null);
-			return arr != Entry.NULL_ARRAY;
+		if (arr != Entry.nullEntryMap.get(arr.getClass())) {
+			dest.put(k, arr);
 		} else {
 			dest.put(k, null);
-			return false;
 		}
+		return true;
 	}
 	
 	public static boolean putValidEntry(JSONObject dest, String idk, String sidk, Entry en) {
