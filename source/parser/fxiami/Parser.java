@@ -59,7 +59,8 @@ public final class Parser {
 				System.err.println("Multiple artists: " + arr.size());
 		}
 		en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId");
-		en.album.name = Helper.parseValidString(cont, "albumName");
+		if (en.album != null)
+			en.album.name = Helper.parseValidString(cont, "albumName");
 		en.disc = Helper.parseValidInteger(cont, "cdSerial");
 		en.track = Helper.parseValidInteger(cont, "track");
 		en.length = Helper.parseValidInteger(cont, "length");
@@ -70,7 +71,22 @@ public final class Parser {
 		cont = o.getJSONObject("songExt");
 		if (cont == null)
 			return en;
-		en.tags = Helper.parseValidArray(cont.getJSONObject("songTag"), "tags", new String[0]);
+		if (cont.containsKey("songTag")) {
+			JSONObject[] tags;
+			tags = Helper.parseValidArray(cont.getJSONObject("songTag"), "tags", new JSONObject[0]);
+			if (tags != null) {
+				List<String[]> li = new ArrayList<>();
+				for (JSONObject tag : tags) {
+					String[] tagen = new String[2];
+					tagen[0] = tag.getString("name");
+					tagen[1] = tag.getString("id");
+					li.add(tagen);
+				}
+				en.tags = li.toArray(new String[li.size()][]);
+			} else {
+				en.tags = new String[0][];
+			}
+		}
 		//TODO
 		return en;
 	}

@@ -68,7 +68,7 @@ public class SongEntry extends Entry {
 	
 	public Long pace;
 	
-	public String[] tags;
+	public String[][] tags;
 	
 	public Long playCount;
 	public Long likeCount;
