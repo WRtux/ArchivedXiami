@@ -17,7 +17,9 @@ import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
 import fxiami.entry.Entry;
 import fxiami.entry.Helper;
+import fxiami.entry.ReferenceEntry;
 import fxiami.entry.SongEntry;
+import fxiami.entry.StaffEntry;
 
 public final class Parser {
 	
@@ -51,12 +53,13 @@ public final class Parser {
 			en.subName = Helper.parseValidString(cont, "subName");
 		if (en.subName != null && en.subName.length() == 0)
 			en.subName = Entry.NULL_STRING;
-		JSONArray arr = cont.getJSONArray("artistVOs");
-		if (arr != null && arr.size() > 0) {
-			en.artist = Helper.parseValidEntry(arr.getJSONObject(0), "artistId", "artistStringId");
-			en.artist.name = Helper.parseValidString(arr.getJSONObject(0), "artistName");
-			if (arr.size() > 1)
-				System.err.println("Multiple artists: " + arr.size());
+		JSONArray artarr = cont.getJSONArray("artistVOs");
+		if (artarr != null && artarr.size() > 0) {
+			en.artist = Helper.parseValidEntry(artarr.getJSONObject(0), "artistId", "artistStringId");
+			if (en.artist != null)
+				en.artist.name = Helper.parseValidString(artarr.getJSONObject(0), "artistName");
+			if (artarr.size() > 1)
+				System.err.println("Multiple artists: " + artarr.size());
 		}
 		en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId");
 		if (en.album != null)
@@ -71,18 +74,30 @@ public final class Parser {
 		cont = o.getJSONObject("songExt");
 		if (cont == null)
 			return en;
+		if (cont.containsKey("behindStaffs")) {
+			JSONObject[] typs = Helper.parseValidArray(cont, "behindStaffs", new JSONObject[0]);
+			en.staff = new StaffEntry[typs.length];
+			for (int i = 0; i < typs.length; i++) {
+				StaffEntry typen = new StaffEntry(typs[i].getString("type"));
+				typen.name = typs[i].getString("name");
+				JSONObject[] arts = typs[i].getJSONArray("staffs").toArray(new JSONObject[0]);
+				typen.artists = new ReferenceEntry[arts.length];
+				for (int j = 0; j < arts.length; j++) {
+					typen.artists[j] = Helper.parseValidEntry(arts[j], "id", null);
+					if (typen.artists[j] != null)
+						typen.artists[j].name = Helper.parseValidString(arts[j], "name");
+				}
+				en.staff[i] = typen;
+			}
+		}
 		if (cont.containsKey("songTag")) {
 			JSONObject[] tags;
 			tags = Helper.parseValidArray(cont.getJSONObject("songTag"), "tags", new JSONObject[0]);
 			if (tags != null) {
-				List<String[]> li = new ArrayList<>();
-				for (JSONObject tag : tags) {
-					String[] tagen = new String[2];
-					tagen[0] = tag.getString("name");
-					tagen[1] = tag.getString("id");
-					li.add(tagen);
+				en.tags = new String[tags.length][];
+				for (int i = 0; i < tags.length; i++) {
+					en.tags[i] = new String[] {tags[i].getString("name"), tags[i].getString("id")};
 				}
-				en.tags = li.toArray(new String[li.size()][]);
 			} else {
 				en.tags = new String[0][];
 			}

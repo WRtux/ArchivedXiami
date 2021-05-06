@@ -57,6 +57,7 @@ public class SongEntry extends Entry {
 	public String subName;
 	
 	public ReferenceEntry artist;
+	public StaffEntry[] staff;
 	
 	public ReferenceEntry album;
 	
@@ -91,6 +92,13 @@ public class SongEntry extends Entry {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
 		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
+		if (this.staff != null) {
+			JSONObject[] typs = new JSONObject[this.staff.length];
+			for (int i = 0; i < typs.length; i++) {
+				typs[i] = this.staff[i].toJSON();
+			}
+			o.put("staff", this.staff != Entry.nullEntryMap.get(StaffEntry[].class) ? typs : null);
+		}
 		o.put("album", this.album != null ? this.album.toJSON() : null);
 		Helper.putValidInteger(o, "disc", this.disc);
 		Helper.putValidInteger(o, "track", this.track);
