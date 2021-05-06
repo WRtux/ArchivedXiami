@@ -121,11 +121,7 @@ public final class Helper {
 	public static boolean putValidArray(JSONObject dest, String k, Object[] arr) {
 		if (arr == null)
 			return false;
-		if (arr != Entry.nullEntryMap.get(arr.getClass())) {
-			dest.put(k, arr);
-		} else {
-			dest.put(k, null);
-		}
+		dest.put(k, arr != Entry.nullEntryMap.get(arr.getClass()) ? arr : null);
 		return true;
 	}
 	
@@ -138,6 +134,18 @@ public final class Helper {
 	}
 	public static boolean putValidEntry(JSONObject dest, Entry en) {
 		return putValidEntry(dest, "id", "sid", en);
+	}
+	
+	public static JSONObject getValidEntry(String idk, String sidk, Entry en) {
+		if (en == null)
+			return null;
+		JSONObject o = new JSONObject(true);
+		o.put(idk, en.id);
+		o.put(sidk, en.sid);
+		return o;
+	}
+	public static JSONObject getValidEntry(Entry en) {
+		return getValidEntry("id", "sid", en);
 	}
 	
 	@Deprecated

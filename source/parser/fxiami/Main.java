@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import fxiami.entry.Entry;
 
@@ -29,7 +30,7 @@ public final class Main {
 			}
 			System.gc();
 			Writer wtr = new OutputStreamWriter(new FileOutputStream("parse.json"), "UTF-8");
-			wtr.write(arr.toJSONString());
+			wtr.write(arr.toString(SerializerFeature.WriteMapNullValue));
 			wtr.close();
 			break;
 		default:
