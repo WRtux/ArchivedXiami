@@ -23,97 +23,138 @@ import fxiami.entry.StaffEntry;
 
 public final class Parser {
 	
-	public static ArtistEntry parseArtistEntry(String dat) {
-		JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("artistDetail");
-		if (cont == null || cont.size() == 0)
-			return null;
-		ArtistEntry en = new ArtistEntry(cont.getLong("artistId"), cont.getString("artistStringId"));
-		//TODO
-		return en;
-	}
-	
-	public static AlbumEntry parseAlbumEntry(String dat) {
-		JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("albumDetail");
-		if (cont == null || cont.size() == 0)
-			return null;
-		AlbumEntry en = new AlbumEntry(cont.getLong("albumId"), cont.getString("albumStringId"));
-		//TODO
-		return en;
-	}
-	
-	public static SongEntry parseSongEntry(String dat) {
-		JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("songDetail");
-		if (cont == null || cont.size() == 0)
-			return null;
-		SongEntry en = new SongEntry(cont.getLong("songId"), cont.getString("songStringId"));
-		en.update = Helper.parseValidInteger(o, "update");
-		en.name = Helper.parseValidString(cont, "songName");
-		en.subName = Helper.parseValidString(cont, "newSubName");
-		if (en.subName == null || en.subName == Entry.NULL_STRING)
-			en.subName = Helper.parseValidString(cont, "subName");
-		if (en.subName != null && en.subName.length() == 0)
-			en.subName = Entry.NULL_STRING;
-		JSONArray artarr = cont.getJSONArray("artistVOs");
-		if (artarr != null && artarr.size() > 0) {
-			en.artist = Helper.parseValidEntry(artarr.getJSONObject(0), "artistId", "artistStringId");
-			if (en.artist != null)
-				en.artist.name = Helper.parseValidString(artarr.getJSONObject(0), "artistName");
-			if (artarr.size() > 1)
-				System.err.println("Multiple artists: " + artarr.size());
-		}
-		en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId");
-		if (en.album != null)
-			en.album.name = Helper.parseValidString(cont, "albumName");
-		en.disc = Helper.parseValidInteger(cont, "cdSerial");
-		en.track = Helper.parseValidInteger(cont, "track");
-		en.length = Helper.parseValidInteger(cont, "length");
-		en.highlight = Helper.parseValidInteger(cont, "hotPartStartTime");
-		en.pace = Helper.parseValidInteger(cont, "pace");
-		en.playCount = Helper.parseValidInteger(cont, "playCount");
-		en.likeCount = Helper.parseValidInteger(cont, "favCount");
-		cont = o.getJSONObject("songExt");
-		if (cont == null)
+	public static final class ArtistParser {
+		
+		public static ArtistEntry parseArtistEntry(String dat) {
+			JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("artistDetail");
+			if (cont == null || cont.size() == 0)
+				return null;
+			ArtistEntry en = new ArtistEntry(cont.getLong("artistId"), cont.getString("artistStringId"));
+			//TODO
 			return en;
-		if (cont.containsKey("behindStaffs")) {
-			JSONObject[] typs = Helper.parseValidArray(cont, "behindStaffs", new JSONObject[0]);
-			en.staff = new StaffEntry[typs.length];
-			for (int i = 0; i < typs.length; i++) {
-				StaffEntry typen = new StaffEntry(typs[i].getString("type"));
-				typen.name = typs[i].getString("name");
-				JSONObject[] arts = typs[i].getJSONArray("staffs").toArray(new JSONObject[0]);
-				typen.artists = new ReferenceEntry[arts.length];
-				for (int j = 0; j < arts.length; j++) {
-					typen.artists[j] = Helper.parseValidEntry(arts[j], "id", null);
-					if (typen.artists[j] != null)
-						typen.artists[j].name = Helper.parseValidString(arts[j], "name");
-				}
-				en.staff[i] = typen;
-			}
 		}
-		if (cont.containsKey("songTag")) {
+		
+		@Deprecated
+		private ArtistParser() {
+			throw new IllegalStateException();
+		}
+		
+	}
+	
+	public static final class AlbumParser {
+		
+		public static AlbumEntry parseAlbumEntry(String dat) {
+			JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("albumDetail");
+			if (cont == null || cont.size() == 0)
+				return null;
+			AlbumEntry en = new AlbumEntry(cont.getLong("albumId"), cont.getString("albumStringId"));
+			//TODO
+			return en;
+		}
+		
+		@Deprecated
+		private AlbumParser() {
+			throw new IllegalStateException();
+		}
+		
+	}
+	
+	public static final class SongParser {
+		
+		static ReferenceEntry processArtist(JSONObject cont) {
+			JSONArray arr = cont.getJSONArray("artistVOs");
+			if (arr == null || arr.size() == 0)
+				return null;
+			if (arr.size() > 1)
+				System.err.println("Multiple artists: " + arr.size());
+			ReferenceEntry en = Helper.parseValidEntry(arr.getJSONObject(0), "artistId", "artistStringId");
+			if (en != null)
+				en.name = Helper.parseValidString(arr.getJSONObject(0), "artistName");
+			return en;
+		}
+		
+		static StaffEntry[] processStaff(JSONObject cont) {
+			if (!cont.containsKey("behindStaffs"))
+				return null;
+			JSONObject[] typs = Helper.parseValidArray(cont, "behindStaffs", new JSONObject[0]);
+			StaffEntry[] ens = new StaffEntry[typs.length];
+			for (int i = 0; i < typs.length; i++) {
+				ens[i] = new StaffEntry(typs[i].getString("type"));
+				ens[i].name = Helper.parseValidString(typs[i], "name");
+				JSONObject[] arts = typs[i].getJSONArray("staffs").toArray(new JSONObject[0]);
+				ens[i].artists = new ReferenceEntry[arts.length];
+				for (int j = 0; j < arts.length; j++) {
+					ens[i].artists[j] = Helper.parseValidEntry(arts[j], "id", null);
+					if (ens[i].artists[j] != null)
+						ens[i].artists[j].name = Helper.parseValidString(arts[j], "name");
+				}
+			}
+			return ens;
+		}
+		
+		static String[][] processTags(JSONObject cont) {
+			if (!cont.containsKey("songTag"))
+				return null;
 			JSONObject[] tags;
 			tags = Helper.parseValidArray(cont.getJSONObject("songTag"), "tags", new JSONObject[0]);
 			if (tags != null) {
-				en.tags = new String[tags.length][];
+				String[][] ens = new String[tags.length][];
 				for (int i = 0; i < tags.length; i++) {
-					en.tags[i] = new String[] {tags[i].getString("name"), tags[i].getString("id")};
+					ens[i] = new String[] {tags[i].getString("name"), tags[i].getString("id")};
 				}
+				return ens;
 			} else {
-				en.tags = new String[0][];
+				return new String[0][];
 			}
 		}
-		//TODO
-		return en;
+		
+		public static SongEntry parseSongEntry(String dat) {
+			JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("songDetail");
+			if (cont == null || cont.size() == 0)
+				return null;
+			SongEntry en = new SongEntry(cont.getLong("songId"), cont.getString("songStringId"));
+			en.update = Helper.parseValidInteger(o, "update");
+			en.name = Helper.parseValidString(cont, "songName");
+			en.subName = Helper.parseValidString(cont, "newSubName");
+			if (en.subName == null || en.subName == Entry.NULL_STRING)
+				en.subName = Helper.parseValidString(cont, "subName");
+			if (en.subName != null && en.subName.length() == 0)
+				en.subName = Entry.NULL_STRING;
+			en.artist = processArtist(cont);
+			en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId");
+			if (en.album != null)
+				en.album.name = Helper.parseValidString(cont, "albumName");
+			en.disc = Helper.parseValidInteger(cont, "cdSerial");
+			en.track = Helper.parseValidInteger(cont, "track");
+			en.length = Helper.parseValidInteger(cont, "length");
+			en.highlight = Helper.parseValidInteger(cont, "hotPartStartTime");
+			en.pace = Helper.parseValidInteger(cont, "pace");
+			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			en.likeCount = Helper.parseValidInteger(cont, "favCount");
+			cont = o.getJSONObject("songExt");
+			if (cont == null)
+				return en;
+			en.staff = processStaff(cont);
+			en.tags = processTags(cont);
+			//TODO
+			return en;
+		}
+		
+		@Deprecated
+		private SongParser() {
+			throw new IllegalStateException();
+		}
+		
 	}
 	
 	public static Entry parseEntry(String typ, String dat) {
 		switch (typ) {
 		case "artist":
-			return parseArtistEntry(dat);
+			return ArtistParser.parseArtistEntry(dat);
 		case "album":
-			return parseAlbumEntry(dat);
+			return AlbumParser.parseAlbumEntry(dat);
 		case "song":
-			return parseSongEntry(dat);
+			return SongParser.parseSongEntry(dat);
 		default:
 			throw new IllegalArgumentException();
 		}
