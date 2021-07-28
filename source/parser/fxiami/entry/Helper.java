@@ -1,7 +1,5 @@
 package fxiami.entry;
 
-import java.lang.reflect.Array;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -73,14 +71,7 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not a valid array: " + String.valueOf(o.get(k)));
 		}
-		if (arr != null) {
-			return arr;
-		} else {
-			Class<?> cls = dest.getClass();
-			if (!Entry.nullEntryMap.containsKey(cls))
-				Entry.nullEntryMap.put(cls, Array.newInstance(cls.getComponentType(), 0));
-			return (T[])Entry.nullEntryMap.get(cls);
-		}
+		return arr != null ? arr : (T[])Entry.forNullEntry(dest.getClass());
 	}
 	
 	public static ReferenceEntry parseValidEntry(JSONObject o, String idk, String sidk) {
@@ -93,6 +84,21 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.printf("Not a valid entry: %s, %s%n",
 				String.valueOf(o.get(idk)), String.valueOf(o.get(sidk)));
+		}
+		return ren;
+	}
+	
+	public static ReferenceEntry parseValidEntry(JSONObject o, String idk, String sidk, String nk) {
+		ReferenceEntry ren = null;
+		try {
+			Long id = o.getLong(idk);
+			String sid = o.getString(sidk);
+			String n = parseValidString(o, nk);
+			if (id != null || sid != null || (n != null && n != Entry.NULL_STRING))
+				ren = new ReferenceEntry(id, sid, n);
+		} catch (RuntimeException ex) {
+			System.out.printf("Not a valid entry: %s, %s, %s%n",
+				String.valueOf(o.get(idk)), String.valueOf(o.get(sidk)), String.valueOf(o.get(nk)));
 		}
 		return ren;
 	}

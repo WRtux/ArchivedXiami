@@ -1,5 +1,6 @@
 package fxiami.entry;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,16 @@ public abstract class Entry {
 		default:
 			throw new IllegalArgumentException();
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T forNullEntry(Class<T> cls) {
+		T o = (T)nullEntryMap.get(cls);
+		if (o == null && cls.isArray()) {
+			o = (T)Array.newInstance(cls.getComponentType(), 0);
+			nullEntryMap.put(cls, o);
+		}
+		return o;
 	}
 	
 	public final Long id;

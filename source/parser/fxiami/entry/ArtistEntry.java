@@ -3,6 +3,8 @@ package fxiami.entry;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class ArtistEntry extends Entry {
 	
 	protected static final Map<Long, ArtistEntry> idEntryMap = new HashMap<>();
@@ -56,17 +58,31 @@ public class ArtistEntry extends Entry {
 	
 	public String logoURL;
 	
+	public Long playCount;
+	public Long likeCount;
+	public Long commentCount;
+	
 	protected ArtistEntry(Long id, String sid, boolean dummy) {
 		super(id, sid, dummy);
-		if (!dummy) {
-			if (this.id != null)
-				idEntryMap.put(id, this);
-			if (this.sid != null)
-				sidEntryMap.put(sid, this);
-		}
+		if (this.id != null)
+			idEntryMap.put(id, this);
+		if (this.sid != null)
+			sidEntryMap.put(sid, this);
 	}
 	public ArtistEntry(Long id, String sid) {
 		this(id, sid, false);
+	}
+	
+	@Override
+	public JSONObject toJSON() {
+		JSONObject o = super.toJSON();
+		Helper.putValidString(o, "subName", this.subName);
+		Helper.putValidString(o, "logoURL", this.logoURL);
+		//TODO
+		Helper.putValidInteger(o, "playCount", this.playCount);
+		Helper.putValidInteger(o, "likeCount", this.likeCount);
+		Helper.putValidInteger(o, "commentCount", this.commentCount);
+		return o;
 	}
 	
 }

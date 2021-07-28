@@ -23,8 +23,7 @@ public class StaffEntry {
 		if (this.artists != null) {
 			JSONArray arr = new JSONArray();
 			for (ReferenceEntry en : this.artists) {
-				if (en != null)
-					arr.add(en.toJSON());
+				arr.add(en != null ? en.toJSON() : null);
 			}
 			o.put("artists", arr);
 		} else {

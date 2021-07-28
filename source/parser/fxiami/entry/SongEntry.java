@@ -3,6 +3,7 @@ package fxiami.entry;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class SongEntry extends Entry {
@@ -57,7 +58,8 @@ public class SongEntry extends Entry {
 	public String subName;
 	
 	public ReferenceEntry artist;
-	public StaffEntry[] staff;
+	public ReferenceEntry[] singers;
+	public StaffEntry[] staffs;
 	
 	public ReferenceEntry album;
 	
@@ -73,15 +75,14 @@ public class SongEntry extends Entry {
 	
 	public Long playCount;
 	public Long likeCount;
+	public Long commentCount;
 	
 	protected SongEntry(Long id, String sid, boolean dummy) {
 		super(id, sid, dummy);
-		if (!dummy) {
-			if (this.id != null)
-				idEntryMap.put(id, this);
-			if (this.sid != null)
-				sidEntryMap.put(sid, this);
-		}
+		if (this.id != null)
+			idEntryMap.put(id, this);
+		if (this.sid != null)
+			sidEntryMap.put(sid, this);
 	}
 	public SongEntry(Long id, String sid) {
 		this(id, sid, false);
@@ -92,12 +93,25 @@ public class SongEntry extends Entry {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
 		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
-		if (this.staff != null) {
-			JSONObject[] typs = new JSONObject[this.staff.length];
-			for (int i = 0; i < typs.length; i++) {
-				typs[i] = this.staff[i].toJSON();
+		if (this.singers != null) {
+			JSONArray arr = null;
+			if (this.singers != Entry.nullEntryMap.get(ReferenceEntry[].class)) {
+				arr = new JSONArray(this.singers.length);
+				for (ReferenceEntry en : this.singers) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
 			}
-			o.put("staff", this.staff != Entry.nullEntryMap.get(StaffEntry[].class) ? typs : null);
+			o.put("singers", arr);
+		}
+		if (this.staffs != null) {
+			JSONArray arr = null;
+			if (this.staffs != Entry.nullEntryMap.get(StaffEntry[].class)) {
+				arr = new JSONArray(this.staffs.length);
+				for (StaffEntry en : this.staffs) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("staffs", arr);
 		}
 		o.put("album", this.album != null ? this.album.toJSON() : null);
 		Helper.putValidInteger(o, "disc", this.disc);
@@ -108,6 +122,7 @@ public class SongEntry extends Entry {
 		Helper.putValidArray(o, "tags", this.tags);
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);
+		Helper.putValidInteger(o, "commentCount", this.commentCount);
 		//TODO
 		return o;
 	}
