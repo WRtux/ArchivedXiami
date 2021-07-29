@@ -24,7 +24,7 @@ public final class Main {
 			break;
 		case "parse":
 			List<Entry> li = Parser.parseJSONM(args[1], new File(args[2]));
-			JSONArray arr = new JSONArray();
+			JSONArray arr = new JSONArray(li.size());
 			for (Entry en : li) {
 				arr.add(en.toJSON());
 			}

@@ -85,8 +85,7 @@ public class AlbumEntry extends Entry {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
 		Helper.putValidString(o, "logoURL", this.logoURL);
-		if (this.artist != null)
-			o.put("artist", this.artist.toJSON());
+		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
 		//TODO
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);

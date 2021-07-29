@@ -39,6 +39,9 @@ public final class Parser {
 			if (cont == null || cont.isEmpty())
 				return null;
 			ArtistEntry en = processEntry(cont);
+			en.update = Helper.parseValidInteger(o, "update");
+			en.name = Helper.parseValidString(cont, "artistName");
+			System.out.println("Process " + en.name);
 			//TODO
 			return en;
 		}
@@ -66,6 +69,9 @@ public final class Parser {
 			if (cont == null || cont.isEmpty())
 				return null;
 			AlbumEntry en = processEntry(cont);
+			en.update = Helper.parseValidInteger(o, "update");
+			en.name = Helper.parseValidString(cont, "albumName");
+			System.out.println("Process " + en.name);
 			//TODO
 			return en;
 		}
@@ -171,6 +177,7 @@ public final class Parser {
 			SongEntry en = processEntry(cont);
 			en.update = Helper.parseValidInteger(o, "update");
 			en.name = Helper.parseValidString(cont, "songName");
+			System.out.println("Process " + en.name);
 			en.subName = Helper.parseValidString(cont, "newSubName");
 			if (en.subName == null || en.subName == Entry.NULL_STRING)
 				en.subName = Helper.parseValidString(cont, "subName");
@@ -224,9 +231,15 @@ public final class Parser {
 			System.out.println("Parsing " + f.getName() + "...");
 			String ln = null;
 			while ((ln = rdr.readLine()) != null) {
-				Entry en = parseEntry(typ, ln);
+				Entry en = null;
+				try {
+					en = parseEntry(typ, ln);
+				} catch (RuntimeException ex) {
+					System.err.println("Unexpected exception:");
+					ex.printStackTrace();
+				}
 				if (en != null) {
-					System.out.println("Process " + en.name);
+					System.out.println("Accept " + en.name);
 					li.add(en);
 				}
 			}

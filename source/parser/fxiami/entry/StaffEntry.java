@@ -21,7 +21,7 @@ public class StaffEntry {
 		o.put("type", this.type);
 		Helper.putValidString(o, "name", this.name);
 		if (this.artists != null) {
-			JSONArray arr = new JSONArray();
+			JSONArray arr = new JSONArray(this.artists.length);
 			for (ReferenceEntry en : this.artists) {
 				arr.add(en != null ? en.toJSON() : null);
 			}
