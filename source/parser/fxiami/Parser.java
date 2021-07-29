@@ -3,15 +3,19 @@ package fxiami;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
@@ -235,7 +239,7 @@ public final class Parser {
 				try {
 					en = parseEntry(typ, ln);
 				} catch (RuntimeException ex) {
-					System.err.println("Unexpected exception:");
+					System.err.println("Unexpected break:");
 					ex.printStackTrace();
 				}
 				if (en != null) {
@@ -250,6 +254,32 @@ public final class Parser {
 			throw ex;
 		} finally {
 			rdr.close();
+		}
+	}
+	
+	public static void exportJSON(String typ, File src, File dest) throws IOException {
+		List<Entry> li = parseJSONM(typ, src);
+		JSONArray arr = new JSONArray(li.size());
+		for (Entry en : li) {
+			try {
+				arr.add(en.toJSON());
+			} catch (RuntimeException ex) {
+				System.err.println("Unexpected break:");
+				ex.printStackTrace();
+			}
+		}
+		System.gc();
+		System.out.println("JSON ready.");
+		System.out.println("Exporting...");
+		Writer wtr = new OutputStreamWriter(new FileOutputStream(dest), "UTF-8");
+		try {
+			wtr.write(arr.toString(SerializerFeature.WriteMapNullValue));
+			System.out.println("Export completed.");
+		} catch (Exception ex) {
+			System.err.println("Export failed.");
+			throw ex;
+		} finally {
+			wtr.close();
 		}
 	}
 	
