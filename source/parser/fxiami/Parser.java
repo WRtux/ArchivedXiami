@@ -8,13 +8,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONWriter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import fxiami.entry.AlbumEntry;
@@ -329,21 +329,22 @@ public final class Parser {
 	
 	public static void exportJSON(String typ, File src, File dest) throws IOException {
 		List<Entry> li = parseJSONM(typ, src);
-		JSONArray arr = new JSONArray(li.size());
-		for (Entry en : li) {
-			try {
-				arr.add(en.toJSON());
-			} catch (RuntimeException ex) {
-				System.err.println("Unexpected break:");
-				ex.printStackTrace();
-			}
-		}
 		System.gc();
 		System.out.println("JSON ready.");
 		System.out.println("Exporting...");
-		Writer wtr = new OutputStreamWriter(new FileOutputStream(dest), "UTF-8");
+		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
+		wtr.config(SerializerFeature.WriteMapNullValue, true);
 		try {
-			wtr.write(arr.toString(SerializerFeature.WriteMapNullValue));
+			wtr.startArray();
+			for (Entry en : li) {
+				try {
+					wtr.writeValue(en.toJSON());
+				} catch (RuntimeException ex) {
+					System.err.println("Unexpected break:");
+					ex.printStackTrace();
+				}
+			}
+			wtr.endArray();
 			System.out.println("Export completed.");
 		} catch (Exception ex) {
 			System.err.println("Export failed.");
