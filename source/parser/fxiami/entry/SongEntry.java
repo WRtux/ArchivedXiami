@@ -71,11 +71,17 @@ public class SongEntry extends Entry {
 	
 	public Long pace;
 	
+	public InfoEntry[] infos;
+	
+	public StyleEntry[] styles;
+	
 	public String[][] tags;
 	
 	public Long playCount;
 	public Long likeCount;
 	public Long commentCount;
+	
+	public LyricEntry[] lyrics;
 	
 	protected SongEntry(Long id, String sid, boolean dummy) {
 		super(id, sid, dummy);
@@ -119,11 +125,40 @@ public class SongEntry extends Entry {
 		Helper.putValidInteger(o, "length", this.length);
 		Helper.putValidInteger(o, "highlight", this.highlight);
 		Helper.putValidInteger(o, "pace", this.pace);
+		if (this.infos != null) {
+			JSONArray arr = null;
+			if (this.infos != Entry.nullEntryMap.get(InfoEntry[].class)) {
+				arr = new JSONArray(this.infos.length);
+				for (InfoEntry en : this.infos) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("infos", arr);
+		}
+		if (this.styles != null) {
+			JSONArray arr = null;
+			if (this.styles != Entry.nullEntryMap.get(StyleEntry[].class)) {
+				arr = new JSONArray(this.styles.length);
+				for (StyleEntry en : this.styles) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("styles", arr);
+		}
 		Helper.putValidArray(o, "tags", this.tags);
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);
 		Helper.putValidInteger(o, "commentCount", this.commentCount);
-		//TODO
+		if (this.lyrics != null) {
+			JSONArray arr = null;
+			if (this.lyrics != Entry.nullEntryMap.get(LyricEntry[].class)) {
+				arr = new JSONArray(this.lyrics.length);
+				for (LyricEntry en : this.lyrics) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("lyrics", arr);
+		}
 		return o;
 	}
 	

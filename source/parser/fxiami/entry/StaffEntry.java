@@ -10,10 +10,14 @@ public class StaffEntry {
 	
 	public ReferenceEntry[] artists;
 	
-	public StaffEntry(String typ) {
+	public StaffEntry(String typ, String n) {
 		if (typ == null || typ == Entry.NULL_STRING)
 			throw new NullPointerException();
 		this.type = typ;
+		this.name = n;
+	}
+	public StaffEntry(String typ) {
+		this(typ, null);
 	}
 	
 	public JSONObject toJSON() {

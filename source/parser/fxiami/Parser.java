@@ -21,9 +21,12 @@ import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
 import fxiami.entry.Entry;
 import fxiami.entry.Helper;
+import fxiami.entry.InfoEntry;
+import fxiami.entry.LyricEntry;
 import fxiami.entry.ReferenceEntry;
 import fxiami.entry.SongEntry;
 import fxiami.entry.StaffEntry;
+import fxiami.entry.StyleEntry;
 
 public final class Parser {
 	
@@ -151,6 +154,45 @@ public final class Parser {
 			}
 		}
 		
+		static InfoEntry[] processInfos(JSONObject cont) {
+			if (!cont.containsKey("songDescs"))
+				return null;
+			try {
+				JSONObject[] infs = cont.getJSONArray("songDescs").toArray(new JSONObject[0]);
+				InfoEntry[] ens = new InfoEntry[infs.length];
+				for (int i = 0; i < infs.length; i++) {
+					ens[i] = new InfoEntry();
+					ens[i].title = Helper.parseValidString(infs[i], "title");
+					ens[i].content = Helper.parseValidString(infs[i], "desc");
+				}
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid infos: " + String.valueOf(cont.get("songDescs")));
+				return Entry.forNullEntry(InfoEntry[].class);
+			}
+		}
+		
+		static StyleEntry[] processStyles(JSONObject cont) {
+			if (!cont.containsKey("styles"))
+				return null;
+			try {
+				JSONObject[] stys = cont.getJSONArray("styles").toArray(new JSONObject[0]);
+				StyleEntry[] ens = new StyleEntry[stys.length];
+				for (int i = 0; i < stys.length; i++) {
+					try {
+						ens[i] = new StyleEntry(stys[i].getLong("styleId"));
+						ens[i].name = Helper.parseValidString(stys[i], "styleName");
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid style: " + String.valueOf(stys[i]));
+					}
+				}
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid styles: " + String.valueOf(cont.get("styles")));
+				return Entry.forNullEntry(StyleEntry[].class);
+			}
+		}
+		
 		static String[][] processTags(JSONObject cont) {
 			if (!cont.containsKey("songTag"))
 				return null;
@@ -171,6 +213,27 @@ public final class Parser {
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid tags: " + String.valueOf(cont.get("songTag")));
 				return Entry.forNullEntry(String[][].class);
+			}
+		}
+		
+		static LyricEntry[] processLyrics(JSONArray arr) {
+			if (arr == null)
+				return null;
+			try {
+				LyricEntry[] ens = new LyricEntry[arr.size()];
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					try {
+						JSONObject o = arr.getJSONObject(i);
+						ens[i] = new LyricEntry(o.getLong("id"));
+						ens[i].content = Helper.parseValidString(o, "content");
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid style: " + String.valueOf(arr.get(i)));
+					}
+				}
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid lyrics: " + String.valueOf(arr));
+				return Entry.forNullEntry(LyricEntry[].class);
 			}
 		}
 		
@@ -201,9 +264,16 @@ public final class Parser {
 				return en;
 			en.singers = processSingers(cont);
 			en.staffs = processStaffs(cont);
+			en.infos = processInfos(cont); 
+			en.styles = processStyles(cont);
 			en.tags = processTags(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "commentCount");
-			//TODO
+			if ((en.playCount != null && en.playCount >= 20000)
+					|| (en.likeCount != null && en.likeCount >= 100)) {
+				en.lyrics = processLyrics(o.getJSONArray("songLyric"));
+				if (en.lyrics != null && en.lyrics.length > 0)
+					System.out.println(en.lyrics.length + " lyrics added.");
+			}
 			return en;
 		}
 		
