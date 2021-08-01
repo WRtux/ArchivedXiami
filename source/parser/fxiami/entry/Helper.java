@@ -33,6 +33,18 @@ public final class Helper {
 		return num != null ? num : Entry.NULL_FLOAT;
 	}
 	
+	public static Boolean parseValidBoolean(JSONObject o, String k) {
+		if (!o.containsKey(k))
+			return null;
+		Boolean b = null;
+		try {
+			b = o.getBoolean(k);
+		} catch (RuntimeException ex) {
+			System.out.println("Not a boolean: " + String.valueOf(o.get(k)));
+		}
+		return b != null ? b : Entry.NULL_BOOLEAN;
+	}
+	
 	public static String parseValidString(JSONObject o, String k) {
 		if (!o.containsKey(k))
 			return null;
@@ -114,6 +126,13 @@ public final class Helper {
 		if (num == null)
 			return false;
 		dest.put(k, num != Entry.NULL_FLOAT ? num.doubleValue() : null);
+		return true;
+	}
+	
+	public static boolean putValidBoolean(JSONObject dest, String k, Boolean b) {
+		if (b == null)
+			return false;
+		dest.put(k, b != Entry.NULL_BOOLEAN ? b : null);
 		return true;
 	}
 	

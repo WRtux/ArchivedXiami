@@ -225,6 +225,8 @@ public final class Parser {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = new LyricEntry(o.getLong("id"));
+						ens[i].type = Helper.parseValidInteger(o, "type");
+						ens[i].official = Helper.parseValidBoolean(o, "flagOfficial");
 						ens[i].content = Helper.parseValidString(o, "content");
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid style: " + String.valueOf(arr.get(i)));
@@ -246,17 +248,24 @@ public final class Parser {
 			en.name = Helper.parseValidString(cont, "songName");
 			System.out.println("Process " + en.name);
 			en.subName = Helper.parseValidString(cont, "newSubName");
-			if (en.subName == null || en.subName == Entry.NULL_STRING)
+			if (en.subName == null || en.subName == Entry.NULL_STRING || en.subName.isEmpty())
 				en.subName = Helper.parseValidString(cont, "subName");
 			if (en.subName != null && en.subName.isEmpty())
 				en.subName = Entry.NULL_STRING;
+			en.translation = Helper.parseValidString(cont, "translation");
+			if (en.translation != null && en.translation.isEmpty())
+				en.translation = Entry.NULL_STRING;
 			en.artist = processArtist(cont);
 			en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId", "albumName");
 			en.disc = Helper.parseValidInteger(cont, "cdSerial");
 			en.track = Helper.parseValidInteger(cont, "track");
 			en.length = Helper.parseValidInteger(cont, "length");
+			if (en.length != null && en.length == 0)
+				en.length = Entry.NULL_INTEGER;
 			en.highlight = Helper.parseValidInteger(cont, "hotPartStartTime");
 			en.pace = Helper.parseValidInteger(cont, "pace");
+			if (en.pace != null && en.pace == 0)
+				en.pace = Entry.NULL_INTEGER;
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "favCount");
 			cont = o.getJSONObject("songExt");

@@ -56,6 +56,7 @@ public class SongEntry extends Entry {
 	}
 	
 	public String subName;
+	public String translation;
 	
 	public ReferenceEntry artist;
 	public ReferenceEntry[] singers;
@@ -98,6 +99,7 @@ public class SongEntry extends Entry {
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
+		Helper.putValidString(o, "translation", this.translation);
 		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
 		if (this.singers != null) {
 			JSONArray arr = null;
