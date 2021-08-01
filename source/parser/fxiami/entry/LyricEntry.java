@@ -6,6 +6,8 @@ public class LyricEntry {
 	
 	public final Long id;
 	
+	public Long update;
+	
 	public Long type;
 	
 	public Boolean official;
@@ -24,6 +26,7 @@ public class LyricEntry {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject(true);
 		o.put("id", this.id);
+		Helper.putValidInteger(o, "update", this.update);
 		Helper.putValidInteger(o, "type", this.type);
 		Helper.putValidBoolean(o, "official", this.official);
 		Helper.putValidString(o, "content", this.content);

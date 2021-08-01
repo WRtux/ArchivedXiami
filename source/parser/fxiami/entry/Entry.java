@@ -12,7 +12,7 @@ public abstract class Entry {
 	
 	public static final Long NULL_INTEGER = new Long(0x80000000_00000000L);
 	public static final Double NULL_FLOAT = Double.longBitsToDouble(0xFFF80000_00000000L);
-	public static final Boolean NULL_BOOLEAN = new Boolean(false); //TODO
+	public static final Boolean NULL_BOOLEAN = new Boolean(false);
 	public static final String NULL_STRING = new String(new char[] {0});
 	public static final Object[] NULL_OBJECT_ARRAY = new Object[0];
 	
