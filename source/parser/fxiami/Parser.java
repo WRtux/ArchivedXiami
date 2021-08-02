@@ -41,15 +41,25 @@ public final class Parser {
 			return en;
 		}
 		
-		public static ArtistEntry parseArtistEntry(String dat) {
-			JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("artistDetail");
+		public static ArtistEntry parseArtistEntry(String dat, boolean ext) {
+			JSONObject o = JSON.parseObject(dat), cont = ext ? o.getJSONObject("artistDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
 			ArtistEntry en = processEntry(cont);
 			en.update = Helper.parseValidInteger(o, "update");
 			en.name = Helper.parseValidString(cont, "artistName");
 			System.out.println("Process " + en.name);
+			en.subName = Helper.parseValidString(cont, "alias");
+			if (en.subName != null && en.subName.isEmpty())
+				en.subName = Entry.NULL_STRING;
+			en.logoURL = Helper.parseValidString(cont, "artistLogo");
 			//TODO
+			if (!ext)
+				return en;
+			cont = o.getJSONObject("artistExt");
+			if (cont != null && !cont.isEmpty()) {
+				//TODO
+			}
 			return en;
 		}
 		
@@ -71,15 +81,25 @@ public final class Parser {
 			return en;
 		}
 		
-		public static AlbumEntry parseAlbumEntry(String dat) {
-			JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("albumDetail");
+		public static AlbumEntry parseAlbumEntry(String dat, boolean ext) {
+			JSONObject o = JSON.parseObject(dat), cont = ext ? o.getJSONObject("albumDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
 			AlbumEntry en = processEntry(cont);
 			en.update = Helper.parseValidInteger(o, "update");
 			en.name = Helper.parseValidString(cont, "albumName");
 			System.out.println("Process " + en.name);
+			en.subName = Helper.parseValidString(cont, "subName");
+			if (en.subName != null && en.subName.isEmpty())
+				en.subName = Entry.NULL_STRING;
+			en.logoURL = Helper.parseValidString(cont, "albumLogo");
 			//TODO
+			if (!ext)
+				return en;
+			cont = o.getJSONObject("artistAlbums");
+			if (cont != null && !cont.isEmpty()) {
+				//TODO
+			}
 			return en;
 		}
 		
@@ -252,8 +272,8 @@ public final class Parser {
 			}
 		}
 		
-		public static SongEntry parseSongEntry(String dat) {
-			JSONObject o = JSON.parseObject(dat), cont = o.getJSONObject("songDetail");
+		public static SongEntry parseSongEntry(String dat, boolean ext) {
+			JSONObject o = JSON.parseObject(dat), cont = ext ? o.getJSONObject("songDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
 			SongEntry en = processEntry(cont);
@@ -281,9 +301,9 @@ public final class Parser {
 				en.pace = Entry.NULL_INTEGER;
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "favCount");
-			cont = o.getJSONObject("songExt");
-			if (cont == null || cont.isEmpty())
+			if (!ext)
 				return en;
+			cont = o.getJSONObject("songExt");
 			if (cont != null && !cont.isEmpty()) {
 				en.singers = processSingers(cont);
 				en.staffs = processStaffs(cont);
@@ -311,11 +331,11 @@ public final class Parser {
 	public static Entry parseEntry(String typ, String dat) {
 		switch (typ) {
 		case "artist":
-			return ArtistParser.parseArtistEntry(dat);
+			return ArtistParser.parseArtistEntry(dat, true);
 		case "album":
-			return AlbumParser.parseAlbumEntry(dat);
+			return AlbumParser.parseAlbumEntry(dat, true);
 		case "song":
-			return SongParser.parseSongEntry(dat);
+			return SongParser.parseSongEntry(dat, true);
 		default:
 			throw new IllegalArgumentException();
 		}
