@@ -3,6 +3,7 @@ package fxiami.entry;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class AlbumEntry extends Entry {
@@ -58,12 +59,26 @@ public class AlbumEntry extends Entry {
 	
 	public String logoURL;
 	
-	public ReferenceEntry artist;
+	public ReferenceEntry[] artists;
+	public ReferenceEntry[] companies;
+	
+	public CategoryEntry category;
 	
 	public Long discCount;
 	public Long songCount;
 	
+	public Long publishTime;
+	
 	public String language;
+	
+	public String info;
+	
+	public StyleEntry[] styles;
+	
+	public ReferenceEntry[] songs;
+	
+	public Long grade;
+	public Long gradeCount;
 	
 	public Long playCount;
 	public Long likeCount;
@@ -85,8 +100,54 @@ public class AlbumEntry extends Entry {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
 		Helper.putValidString(o, "logoURL", this.logoURL);
-		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
-		//TODO
+		if (this.artists != null) {
+			JSONArray arr = null;
+			if (this.artists != Entry.nullEntryMap.get(ReferenceEntry[].class)) {
+				arr = new JSONArray(this.artists.length);
+				for (ReferenceEntry en : this.artists) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("artists", arr);
+		}
+		if (this.companies != null) {
+			JSONArray arr = null;
+			if (this.artists != Entry.nullEntryMap.get(ReferenceEntry[].class)) {
+				arr = new JSONArray(this.companies.length);
+				for (ReferenceEntry en : this.companies) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("companies", arr);
+		}
+		o.put("category", this.category != null ? this.category.toJSON() : null);
+		Helper.putValidInteger(o, "discCount", this.discCount);
+		Helper.putValidInteger(o, "songCount", this.songCount);
+		Helper.putValidInteger(o, "publishTime", this.publishTime);
+		Helper.putValidString(o, "language", this.language);
+		Helper.putValidString(o, "info", this.info);
+		if (this.styles != null) {
+			JSONArray arr = null;
+			if (this.styles != Entry.nullEntryMap.get(StyleEntry[].class)) {
+				arr = new JSONArray(this.styles.length);
+				for (StyleEntry en : this.styles) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("styles", arr);
+		}
+		if (this.songs != null) {
+			JSONArray arr = null;
+			if (this.songs != Entry.nullEntryMap.get(ReferenceEntry[].class)) {
+				arr = new JSONArray(this.songs.length);
+				for (ReferenceEntry en : this.songs) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("songs", arr);
+		}
+		Helper.putValidInteger(o, "grade", this.grade);
+		Helper.putValidInteger(o, "gradeCount", this.gradeCount);
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);
 		Helper.putValidInteger(o, "commentCount", this.commentCount);

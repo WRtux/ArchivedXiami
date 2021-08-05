@@ -19,6 +19,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
+import fxiami.entry.CategoryEntry;
 import fxiami.entry.Entry;
 import fxiami.entry.Helper;
 import fxiami.entry.InfoEntry;
@@ -81,6 +82,83 @@ public final class Parser {
 			return en;
 		}
 		
+		static ReferenceEntry[] processArtists(JSONObject cont) {
+			if (!cont.containsKey("artists"))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray("artists");
+				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					try {
+						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i),
+							"artistId", "artistStringId", "artistName");
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid artist: " + String.valueOf(arr.get(i)));
+					}
+				}
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid artists: " + String.valueOf(cont.get("artists")));
+				return Entry.forNullEntry(ReferenceEntry[].class);
+			}
+		}
+		
+		static ReferenceEntry[] processCompanies(JSONObject cont) {
+			if (!cont.containsKey("companies"))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray("companies");
+				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					try {
+						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i), "id", null, "name");
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid company: " + String.valueOf(arr.get(i)));
+					}
+				}
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid companies: " + String.valueOf(cont.get("companies")));
+				return Entry.forNullEntry(ReferenceEntry[].class);
+			}
+		}
+		
+		static CategoryEntry processCategory(JSONObject cont) {
+			if (!cont.containsKey("categoryId"))
+				return null;
+			try {
+				CategoryEntry en = new CategoryEntry(cont.getLong("categoryId"));
+				en.name = Helper.parseValidString(cont, "albumCategory");
+				return en;
+			} catch (RuntimeException ex) {
+				System.out.printf("Not a valid category: %s, %s%n",
+					String.valueOf(cont.get("categoryId")), String.valueOf(cont.get("albumCategory")));
+				return null;
+			}
+		}
+		
+		static ReferenceEntry[] processSongs(JSONObject cont) {
+			if (!cont.containsKey("songs"))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray("songs");
+				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					try {
+						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i),
+							"songId", "songStringId", "songName");
+//						SongParser.parseSongEntry(dat, false);
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid song: " + String.valueOf(arr.get(i)));
+					}
+				}
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid songs: " + String.valueOf(cont.get("songs")));
+				return Entry.forNullEntry(ReferenceEntry[].class);
+			}
+		}
+		
 		public static AlbumEntry parseAlbumEntry(String dat, boolean ext) {
 			JSONObject o = JSON.parseObject(dat), cont = ext ? o.getJSONObject("albumDetail") : o;
 			if (cont == null || cont.isEmpty())
@@ -93,9 +171,28 @@ public final class Parser {
 			if (en.subName != null && en.subName.isEmpty())
 				en.subName = Entry.NULL_STRING;
 			en.logoURL = Helper.parseValidString(cont, "albumLogo");
-			//TODO
+			en.artists = processArtists(cont);
+			en.companies = processCompanies(cont);
+			en.category = processCategory(cont);
+			en.discCount = Helper.parseValidInteger(cont, "cdCount");
+			en.songCount = Helper.parseValidInteger(cont, "songCount");
+			en.publishTime = Helper.parseValidInteger(cont, "gmtPublish");
+			en.language = Helper.parseValidString(cont, "language");
+			Double d = Helper.parseValidFloat(cont, "grade");
+			if (d != null && d != Entry.NULL_FLOAT) {
+				en.grade = Math.round(d.doubleValue() * 10);
+			} else if (d == Entry.NULL_FLOAT) {
+				en.grade = Entry.NULL_INTEGER;
+			}
+			en.gradeCount = Helper.parseValidInteger(cont, "gradeCount");
+			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			en.likeCount = Helper.parseValidInteger(cont, "collects");
 			if (!ext)
 				return en;
+			en.info = Helper.parseValidString(cont, "description");
+			en.styles = SongParser.processStyles(cont);
+			en.songs = processSongs(cont);
+			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			cont = o.getJSONObject("artistAlbums");
 			if (cont != null && !cont.isEmpty()) {
 				//TODO
@@ -370,13 +467,12 @@ public final class Parser {
 			throw ex;
 		} finally {
 			rdr.close();
+			System.gc();
 		}
 	}
 	
 	public static void exportJSON(String typ, File src, File dest) throws IOException {
 		List<Entry> li = parseJSONM(typ, src);
-		System.gc();
-		System.out.println("JSON ready.");
 		System.out.println("Exporting...");
 		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
 		wtr.config(SerializerFeature.WriteMapNullValue, true);
@@ -397,6 +493,7 @@ public final class Parser {
 			throw ex;
 		} finally {
 			wtr.close();
+			System.gc();
 		}
 	}
 	
