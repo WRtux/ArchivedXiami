@@ -78,11 +78,11 @@ public class SongEntry extends Entry {
 	
 	public String[][] tags;
 	
+	public LyricEntry[] lyrics;
+	
 	public Long playCount;
 	public Long likeCount;
 	public Long commentCount;
-	
-	public LyricEntry[] lyrics;
 	
 	protected SongEntry(Long id, String sid, boolean dummy) {
 		super(id, sid, dummy);
@@ -148,9 +148,6 @@ public class SongEntry extends Entry {
 			o.put("styles", arr);
 		}
 		Helper.putValidArray(o, "tags", this.tags);
-		Helper.putValidInteger(o, "playCount", this.playCount);
-		Helper.putValidInteger(o, "likeCount", this.likeCount);
-		Helper.putValidInteger(o, "commentCount", this.commentCount);
 		if (this.lyrics != null) {
 			JSONArray arr = null;
 			if (this.lyrics != Entry.nullEntryMap.get(LyricEntry[].class)) {
@@ -161,6 +158,9 @@ public class SongEntry extends Entry {
 			}
 			o.put("lyrics", arr);
 		}
+		Helper.putValidInteger(o, "playCount", this.playCount);
+		Helper.putValidInteger(o, "likeCount", this.likeCount);
+		Helper.putValidInteger(o, "commentCount", this.commentCount);
 		return o;
 	}
 	

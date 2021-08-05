@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 public abstract class Entry {
 	
-	public static final Map<Class<?>, Object> nullEntryMap = new HashMap<>();
+	protected static final Map<Class<?>, Object> nullEntryMap = new HashMap<>();
 	
 	public static final Long NULL_INTEGER = new Long(0x80000000_00000000L);
 	public static final Double NULL_FLOAT = Double.longBitsToDouble(0xFFF80000_00000000L);
@@ -23,7 +23,6 @@ public abstract class Entry {
 		nullEntryMap.put(Boolean.class, NULL_BOOLEAN);
 		nullEntryMap.put(String.class, NULL_STRING);
 		nullEntryMap.put(Object[].class, NULL_OBJECT_ARRAY);
-		nullEntryMap.put(String[].class, new String[0]);
 	}
 	
 	public static Class<? extends Entry> getEntryClass(String typ) {
