@@ -42,14 +42,14 @@ public final class Parser {
 			return en;
 		}
 		
-		public static ArtistEntry parseArtistEntry(String dat, boolean ext) {
-			JSONObject o = JSON.parseObject(dat), cont = ext ? o.getJSONObject("artistDetail") : o;
+		public static ArtistEntry parseArtistEntry(JSONObject o, boolean ext) {
+			JSONObject cont = ext ? o.getJSONObject("artistDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
 			ArtistEntry en = processEntry(cont);
 			en.update = Helper.parseValidInteger(o, "update");
 			en.name = Helper.parseValidString(cont, "artistName");
-			System.out.println("Process " + en.name);
+			System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "alias");
 			if (en.subName != null && en.subName.isEmpty())
 				en.subName = Entry.NULL_STRING;
@@ -145,9 +145,9 @@ public final class Parser {
 				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
 				for (int i = 0, len = arr.size(); i < len; i++) {
 					try {
-						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i),
-							"songId", "songStringId", "songName");
-//						SongParser.parseSongEntry(dat, false);
+						JSONObject o = arr.getJSONObject(i);
+						ens[i] = Helper.parseValidEntry(o, "songId", "songStringId", "songName");
+						SongParser.parseSongEntry(o, false);
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid song: " + String.valueOf(arr.get(i)));
 					}
@@ -159,14 +159,14 @@ public final class Parser {
 			}
 		}
 		
-		public static AlbumEntry parseAlbumEntry(String dat, boolean ext) {
-			JSONObject o = JSON.parseObject(dat), cont = ext ? o.getJSONObject("albumDetail") : o;
+		public static AlbumEntry parseAlbumEntry(JSONObject o, boolean ext) {
+			JSONObject cont = ext ? o.getJSONObject("albumDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
 			AlbumEntry en = processEntry(cont);
 			en.update = Helper.parseValidInteger(o, "update");
 			en.name = Helper.parseValidString(cont, "albumName");
-			System.out.println("Process " + en.name);
+			System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "subName");
 			if (en.subName != null && en.subName.isEmpty())
 				en.subName = Entry.NULL_STRING;
@@ -194,8 +194,15 @@ public final class Parser {
 			en.songs = processSongs(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			cont = o.getJSONObject("artistAlbums");
-			if (cont != null && !cont.isEmpty()) {
-				//TODO
+			if (cont != null && cont.containsKey("albums")) {
+				JSONArray arr = cont.getJSONArray("albums");
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					try {
+						parseAlbumEntry(arr.getJSONObject(i), false);
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid album: " + String.valueOf(arr.get(i)));
+					}
+				}
 			}
 			return en;
 		}
@@ -369,14 +376,14 @@ public final class Parser {
 			}
 		}
 		
-		public static SongEntry parseSongEntry(String dat, boolean ext) {
-			JSONObject o = JSON.parseObject(dat), cont = ext ? o.getJSONObject("songDetail") : o;
+		public static SongEntry parseSongEntry(JSONObject o, boolean ext) {
+			JSONObject cont = ext ? o.getJSONObject("songDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
 			SongEntry en = processEntry(cont);
 			en.update = Helper.parseValidInteger(o, "update");
 			en.name = Helper.parseValidString(cont, "songName");
-			System.out.println("Process " + en.name);
+			System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "newSubName");
 			if (en.subName == null || en.subName == Entry.NULL_STRING || en.subName.isEmpty())
 				en.subName = Helper.parseValidString(cont, "subName");
@@ -425,17 +432,20 @@ public final class Parser {
 		
 	}
 	
-	public static Entry parseEntry(String typ, String dat) {
+	public static Entry parseEntry(String typ, JSONObject o) {
 		switch (typ) {
 		case "artist":
-			return ArtistParser.parseArtistEntry(dat, true);
+			return ArtistParser.parseArtistEntry(o, true);
 		case "album":
-			return AlbumParser.parseAlbumEntry(dat, true);
+			return AlbumParser.parseAlbumEntry(o, true);
 		case "song":
-			return SongParser.parseSongEntry(dat, true);
+			return SongParser.parseSongEntry(o, true);
 		default:
 			throw new IllegalArgumentException();
 		}
+	}
+	public static Entry parseEntry(String typ, String dat) {
+		return parseEntry(typ, JSON.parseObject(dat));
 	}
 	
 	public static List<Entry> parseJSONM(String typ, File f) throws IOException {
@@ -454,7 +464,7 @@ public final class Parser {
 					ex.printStackTrace();
 				}
 				if (en != null) {
-					System.out.println("Accept " + en.name);
+					System.out.println("Accepted: " + en.name);
 					li.add(en);
 				} else {
 					System.out.println("Rejected: " + ln);
