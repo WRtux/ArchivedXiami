@@ -51,7 +51,7 @@ public abstract class Entry {
 	public final Long id;
 	public final String sid;
 	
-	protected final boolean dummy;
+	public final boolean dummy;
 	
 	public Long update;
 	

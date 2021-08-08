@@ -33,12 +33,22 @@ public final class Parser {
 	
 	public static final class ArtistParser {
 		
-		static ArtistEntry processEntry(JSONObject cont) {
+		static ArtistEntry processEntry(JSONObject cont, boolean ext) {
 			Long id = cont.getLong("artistId");
 			String sid = cont.getString("artistStringId");
-			ArtistEntry en = ArtistEntry.getExactEntry(id, sid);
-			if (en == null)
-				en = new ArtistEntry(id, sid);
+			ArtistEntry en = null;
+			if (ext) {
+				en = ArtistEntry.getExactEntry(id, sid);
+				if (en == null)
+					en = new ArtistEntry(id, sid);
+			} else {
+				en = ArtistEntry.matchDummyEntry(id, sid);
+				if (en != null) {
+					System.out.print("P. ");
+				} else {
+					System.out.print("S. ");
+				}
+			}
 			return en;
 		}
 		
@@ -46,10 +56,12 @@ public final class Parser {
 			JSONObject cont = ext ? o.getJSONObject("artistDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
-			ArtistEntry en = processEntry(cont);
-			en.update = Helper.parseValidInteger(o, "update");
+			ArtistEntry en = processEntry(cont, ext);
+			if (en == null)
+				return null;
 			en.name = Helper.parseValidString(cont, "artistName");
-			System.out.println("Processing " + en.name + "...");
+			if (ext)
+				System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "alias");
 			if (en.subName != null && en.subName.isEmpty())
 				en.subName = Entry.NULL_STRING;
@@ -57,6 +69,7 @@ public final class Parser {
 			//TODO
 			if (!ext)
 				return en;
+			en.update = Helper.parseValidInteger(o, "update");
 			cont = o.getJSONObject("artistExt");
 			if (cont != null && !cont.isEmpty()) {
 				//TODO
@@ -73,12 +86,22 @@ public final class Parser {
 	
 	public static final class AlbumParser {
 		
-		static AlbumEntry processEntry(JSONObject cont) {
+		static AlbumEntry processEntry(JSONObject cont, boolean ext) {
 			Long id = cont.getLong("albumId");
 			String sid = cont.getString("albumStringId");
-			AlbumEntry en = AlbumEntry.getExactEntry(id, sid);
-			if (en == null)
-				en = new AlbumEntry(id, sid);
+			AlbumEntry en = null;
+			if (ext) {
+				en = AlbumEntry.getExactEntry(id, sid);
+				if (en == null)
+					en = new AlbumEntry(id, sid);
+			} else {
+				en = AlbumEntry.matchDummyEntry(id, sid);
+				if (en != null) {
+					System.out.print("P. ");
+				} else {
+					System.out.print("S. ");
+				}
+			}
 			return en;
 		}
 		
@@ -163,10 +186,12 @@ public final class Parser {
 			JSONObject cont = ext ? o.getJSONObject("albumDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
-			AlbumEntry en = processEntry(cont);
-			en.update = Helper.parseValidInteger(o, "update");
+			AlbumEntry en = processEntry(cont, ext);
+			if (en == null)
+				return null;
 			en.name = Helper.parseValidString(cont, "albumName");
-			System.out.println("Processing " + en.name + "...");
+			if (ext)
+				System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "subName");
 			if (en.subName != null && en.subName.isEmpty())
 				en.subName = Entry.NULL_STRING;
@@ -189,6 +214,7 @@ public final class Parser {
 			en.likeCount = Helper.parseValidInteger(cont, "collects");
 			if (!ext)
 				return en;
+			en.update = Helper.parseValidInteger(o, "update");
 			en.info = Helper.parseValidString(cont, "description");
 			en.styles = SongParser.processStyles(cont);
 			en.songs = processSongs(cont);
@@ -216,12 +242,22 @@ public final class Parser {
 	
 	public static final class SongParser {
 		
-		static SongEntry processEntry(JSONObject cont) {
+		static SongEntry processEntry(JSONObject cont, boolean ext) {
 			Long id = cont.getLong("songId");
 			String sid = cont.getString("songStringId");
-			SongEntry en = SongEntry.getExactEntry(id, sid);
-			if (en == null)
-				en = new SongEntry(id, sid);
+			SongEntry en = null;
+			if (ext) {
+				en = SongEntry.getExactEntry(id, sid);
+				if (en == null)
+					en = new SongEntry(id, sid);
+			} else {
+				en = SongEntry.matchDummyEntry(id, sid);
+				if (en != null) {
+					System.out.print("P. ");
+				} else {
+					System.out.print("S. ");
+				}
+			}
 			return en;
 		}
 		
@@ -380,10 +416,12 @@ public final class Parser {
 			JSONObject cont = ext ? o.getJSONObject("songDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
-			SongEntry en = processEntry(cont);
-			en.update = Helper.parseValidInteger(o, "update");
+			SongEntry en = processEntry(cont, ext);
+			if (en == null)
+				return null;
 			en.name = Helper.parseValidString(cont, "songName");
-			System.out.println("Processing " + en.name + "...");
+			if (ext)
+				System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "newSubName");
 			if (en.subName == null || en.subName == Entry.NULL_STRING || en.subName.isEmpty())
 				en.subName = Helper.parseValidString(cont, "subName");
@@ -407,6 +445,7 @@ public final class Parser {
 			en.likeCount = Helper.parseValidInteger(cont, "favCount");
 			if (!ext)
 				return en;
+			en.update = Helper.parseValidInteger(o, "update");
 			cont = o.getJSONObject("songExt");
 			if (cont != null && !cont.isEmpty()) {
 				en.singers = processSingers(cont);

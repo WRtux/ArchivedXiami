@@ -2,6 +2,7 @@ package fxiami.entry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -19,40 +20,76 @@ public class AlbumEntry extends Entry {
 		return sidEntryMap.get(sid);
 	}
 	
-	public static AlbumEntry getExactEntry(Long id, String sid) {
-		AlbumEntry[] ens = {idEntryMap.get(id), sidEntryMap.get(sid)};
-		AlbumEntry en;
-		if (ens[0] == ens[1]) {
-			en = ens[1];
-		} else {
-			if (ens[0] == null) {
-				en = ens[1];
-			} else if (ens[1] == null) {
-				en = ens[0];
-			} else {
-				System.err.printf("Mismatch for id: %d, sid: %s.%n", id, sid);
-				en = null;
-			}
+	public static AlbumEntry getEntry(Long id, String sid) {
+		AlbumEntry en = idEntryMap.get(id);
+		if (en != null) {
+			if (sid == null || sid.equals(en.sid))
+				return en;
+			System.err.printf("SID mismatch for ID: %d, SID: %s, expected %s.%n", id, sid, en.sid);
 		}
-		return (en != null && !en.dummy) ? en : null;
+		en = sidEntryMap.get(sid);
+		if (en != null) {
+			if (id == null || id.equals(en.id))
+				return en;
+			System.err.printf("ID mismatch for ID: %d, SID: %s, expected %d.%n", id, sid, en.id);
+		}
+		return null;
+	}
+	
+	public static AlbumEntry getExactEntry(Long id, String sid) {
+		AlbumEntry en = idEntryMap.get(id);
+		if (en != null && !en.dummy) {
+			if (Objects.equals(en.sid, sid))
+				return en;
+			System.err.printf("SID mismatch for ID: %d, SID: %s, expected %s.%n", id, sid, en.sid);
+		}
+		en = sidEntryMap.get(sid);
+		if (en != null && !en.dummy) {
+			if (Objects.equals(en.id, id))
+				return en;
+			System.err.printf("ID mismatch for ID: %d, SID: %s, expected %d.%n", id, sid, en.id);
+		}
+		return null;
 	}
 	
 	public static AlbumEntry matchEntry(Long id, String sid) {
-		AlbumEntry[] ens = {idEntryMap.get(id), sidEntryMap.get(sid)};
-		if (ens[0] == ens[1]) {
-			if (ens[1] == null)
-				ens[1] = new AlbumEntry(id, sid, true);
-			return ens[1];
-		} else {
-			if (ens[0] == null) {
-				return ens[1];
-			} else if (ens[1] == null) {
-				return ens[0];
-			} else {
-				System.err.printf("Mismatch for id: %d, sid: %s.%n", id, sid);
-				return ens[1];
-			}
+		AlbumEntry en = idEntryMap.get(id);
+		if (en != null) {
+			if (sid == null || sid.equals(en.sid))
+				return en;
+			System.err.printf("SID mismatch for ID: %d, SID: %s, expected %s.%n", id, sid, en.sid);
+			if (!en.dummy)
+				return null;
 		}
+		en = sidEntryMap.get(sid);
+		if (en != null) {
+			if (id == null || id.equals(en.id))
+				return en;
+			System.err.printf("ID mismatch for ID: %d, SID: %s, expected %d.%n", id, sid, en.id);
+			if (!en.dummy)
+				return null;
+		}
+		return new AlbumEntry(id, sid, true);
+	}
+	
+	public static AlbumEntry matchDummyEntry(Long id, String sid) {
+		AlbumEntry en = idEntryMap.get(id);
+		if (en != null) {
+			if (!en.dummy)
+				return null;
+			if (sid == null || sid.equals(en.sid))
+				return en;
+			System.err.printf("SID mismatch for ID: %d, SID: %s, expected %s.%n", id, sid, en.sid);
+		}
+		en = sidEntryMap.get(sid);
+		if (en != null) {
+			if (!en.dummy)
+				return null;
+			if (id == null || id.equals(en.id))
+				return en;
+			System.err.printf("ID mismatch for ID: %d, SID: %s, expected %d.%n", id, sid, en.id);
+		}
+		return new AlbumEntry(id, sid, true);
 	}
 	
 	public String subName;
