@@ -338,14 +338,15 @@ public final class Parser {
 			if (!cont.containsKey("styles"))
 				return null;
 			try {
-				JSONObject[] stys = cont.getJSONArray("styles").toArray(new JSONObject[0]);
-				StyleEntry[] ens = new StyleEntry[stys.length];
-				for (int i = 0; i < stys.length; i++) {
+				JSONArray arr = cont.getJSONArray("styles");
+				StyleEntry[] ens = new StyleEntry[arr.size()];
+				for (int i = 0, len = arr.size(); i < len; i++) {
 					try {
-						ens[i] = new StyleEntry(stys[i].getLong("styleId"));
-						ens[i].name = Helper.parseValidString(stys[i], "styleName");
+						JSONObject o = arr.getJSONObject(i);
+						ens[i] = new StyleEntry(o.getLong("styleId"));
+						ens[i].name = Helper.parseValidString(o, "styleName");
 					} catch (RuntimeException ex) {
-						System.out.println("Not a valid style: " + String.valueOf(stys[i]));
+						System.out.println("Not a valid style: " + String.valueOf(arr.get(i)));
 					}
 				}
 				return ens;
@@ -362,13 +363,14 @@ public final class Parser {
 				cont = cont.getJSONObject("songTag");
 				if (!cont.containsKey("tags"))
 					return new String[0][];
-				JSONObject[] tags = cont.getJSONArray("tags").toArray(new JSONObject[0]);
-				String[][] ens = new String[tags.length][];
-				for (int i = 0; i < tags.length; i++) {
+				JSONArray arr = cont.getJSONArray("tags");
+				String[][] ens = new String[arr.size()][];
+				for (int i = 0, len = arr.size(); i < len; i++) {
 					try {
-						ens[i] = new String[] {tags[i].getString("name"), tags[i].getString("id")};
+						JSONObject o = arr.getJSONObject(i);
+						ens[i] = new String[] {o.getString("name"), o.getString("id")};
 					} catch (RuntimeException ex) {
-						System.out.println("Not a valid tag: " + String.valueOf(tags[i]));
+						System.out.println("Not a valid tag: " + String.valueOf(arr.get(i)));
 					}
 				}
 				return ens;
