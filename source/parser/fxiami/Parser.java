@@ -43,11 +43,6 @@ public final class Parser {
 					en = new ArtistEntry(id, sid);
 			} else {
 				en = ArtistEntry.matchDummyEntry(id, sid);
-				if (en != null) {
-					System.out.print("P. ");
-				} else {
-					System.out.print("S. ");
-				}
 			}
 			return en;
 		}
@@ -96,11 +91,6 @@ public final class Parser {
 					en = new AlbumEntry(id, sid);
 			} else {
 				en = AlbumEntry.matchDummyEntry(id, sid);
-				if (en != null) {
-					System.out.print("P. ");
-				} else {
-					System.out.print("S. ");
-				}
 			}
 			return en;
 		}
@@ -166,15 +156,18 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("songs");
 				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
+				int cnt = 0;
 				for (int i = 0, len = arr.size(); i < len; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = Helper.parseValidEntry(o, "songId", "songStringId", "songName");
-						SongParser.parseSongEntry(o, false);
+						if (SongParser.parseSongEntry(o, false) != null)
+							cnt++;
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid song: " + String.valueOf(arr.get(i)));
 					}
 				}
+				System.out.printf("%d/%d songs listed.%n", cnt, ens.length);
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid songs: " + String.valueOf(cont.get("songs")));
@@ -222,13 +215,16 @@ public final class Parser {
 			cont = o.getJSONObject("artistAlbums");
 			if (cont != null && cont.containsKey("albums")) {
 				JSONArray arr = cont.getJSONArray("albums");
+				int cnt = 0;
 				for (int i = 0, len = arr.size(); i < len; i++) {
 					try {
-						parseAlbumEntry(arr.getJSONObject(i), false);
+						if (parseAlbumEntry(arr.getJSONObject(i), false) != null)
+							cnt++;
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid album: " + String.valueOf(arr.get(i)));
 					}
 				}
+				System.out.printf("%d/%d albums added.%n", cnt, arr.size());
 			}
 			return en;
 		}
@@ -252,11 +248,6 @@ public final class Parser {
 					en = new SongEntry(id, sid);
 			} else {
 				en = SongEntry.matchDummyEntry(id, sid);
-				if (en != null) {
-					System.out.print("P. ");
-				} else {
-					System.out.print("S. ");
-				}
 			}
 			return en;
 		}
@@ -450,6 +441,12 @@ public final class Parser {
 			if (cont != null && !cont.isEmpty()) {
 				en.singers = processSingers(cont);
 				en.staffs = processStaffs(cont);
+				try {
+					if (AlbumParser.parseAlbumEntry(cont.getJSONObject("album"), false) != null)
+						System.out.println("Album extension added.");
+				} catch (RuntimeException ex) {
+					System.out.println("Not a valid album: " + String.valueOf(cont.get("album")));
+				}
 				en.infos = processInfos(cont); 
 				en.styles = processStyles(cont);
 				en.tags = processTags(cont);
@@ -459,7 +456,7 @@ public final class Parser {
 					|| (en.likeCount != null && en.likeCount >= 100)) {
 				en.lyrics = processLyrics(o);
 				if (en.lyrics != null && en.lyrics.length > 0)
-					System.out.println(en.lyrics.length + " lyrics added.");
+					System.out.println(en.lyrics.length + " lyrics listed.");
 			}
 			return en;
 		}
