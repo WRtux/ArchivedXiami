@@ -105,9 +105,11 @@ public class SongEntry extends Entry {
 	public Long track;
 	
 	public Long length;
-	public Long highlight;
 	
 	public Long pace;
+	
+	public Long highlightOffset;
+	public Long highlightLength;
 	
 	public InfoEntry[] infos;
 	
@@ -162,8 +164,9 @@ public class SongEntry extends Entry {
 		Helper.putValidInteger(o, "disc", this.disc);
 		Helper.putValidInteger(o, "track", this.track);
 		Helper.putValidInteger(o, "length", this.length);
-		Helper.putValidInteger(o, "highlight", this.highlight);
 		Helper.putValidInteger(o, "pace", this.pace);
+		Helper.putValidInteger(o, "highlightOffset", this.highlightOffset);
+		Helper.putValidInteger(o, "highlightLength", this.highlightLength);
 		if (this.infos != null) {
 			JSONArray arr = null;
 			if (this.infos != Entry.nullEntryMap.get(InfoEntry[].class)) {

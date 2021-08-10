@@ -175,6 +175,29 @@ public final class Parser {
 			}
 		}
 		
+		static AlbumEntry[] processSimilars(JSONObject cont) {
+			if (!cont.containsKey("albums"))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray("albums");
+				AlbumEntry[] ens = new AlbumEntry[arr.size()];
+				int cnt = 0;
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					try {
+						if (parseAlbumEntry(arr.getJSONObject(i), false) != null)
+							cnt++;
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid album: " + String.valueOf(arr.get(i)));
+					}
+				}
+				System.out.printf("%d/%d albums added.%n", cnt, ens.length);
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid albums: " + String.valueOf(cont.get("albums")));
+				return Entry.forNullEntry(AlbumEntry[].class);
+			}
+		}
+		
 		public static AlbumEntry parseAlbumEntry(JSONObject o, boolean ext) {
 			JSONObject cont = ext ? o.getJSONObject("albumDetail") : o;
 			if (cont == null || cont.isEmpty())
@@ -213,19 +236,8 @@ public final class Parser {
 			en.songs = processSongs(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			cont = o.getJSONObject("artistAlbums");
-			if (cont != null && cont.containsKey("albums")) {
-				JSONArray arr = cont.getJSONArray("albums");
-				int cnt = 0;
-				for (int i = 0, len = arr.size(); i < len; i++) {
-					try {
-						if (parseAlbumEntry(arr.getJSONObject(i), false) != null)
-							cnt++;
-					} catch (RuntimeException ex) {
-						System.out.println("Not a valid album: " + String.valueOf(arr.get(i)));
-					}
-				}
-				System.out.printf("%d/%d albums added.%n", cnt, arr.size());
-			}
+			if (cont != null && !cont.isEmpty())
+				processSimilars(cont);
 			return en;
 		}
 		
@@ -380,6 +392,30 @@ public final class Parser {
 			}
 		}
 		
+		static SongEntry[] processSimilars(JSONObject cont) {
+			String n = "similarSongsFullInfo";
+			if (!cont.containsKey(n))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray(n);
+				SongEntry[] ens = new SongEntry[arr.size()];
+				int cnt = 0;
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					try {
+						if (parseSongEntry(arr.getJSONObject(i), false) != null)
+							cnt++;
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid song: " + String.valueOf(arr.get(i)));
+					}
+				}
+				System.out.printf("%d/%d songs added.%n", cnt, ens.length);
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid songs: " + String.valueOf(cont.get(n)));
+				return Entry.forNullEntry(SongEntry[].class);
+			}
+		}
+		
 		static LyricEntry[] processLyrics(JSONObject cont) {
 			if (!cont.containsKey("songLyric"))
 				return null;
@@ -430,10 +466,19 @@ public final class Parser {
 			en.length = Helper.parseValidInteger(cont, "length");
 			if (en.length != null && en.length == 0)
 				en.length = Entry.NULL_INTEGER;
-			en.highlight = Helper.parseValidInteger(cont, "hotPartStartTime");
 			en.pace = Helper.parseValidInteger(cont, "pace");
 			if (en.pace != null && en.pace == 0)
 				en.pace = Entry.NULL_INTEGER;
+			en.highlightOffset = Helper.parseValidInteger(cont, "hotPartStartTime");
+			if (en.highlightOffset != null && en.highlightOffset == 0)
+				en.highlightOffset = Entry.NULL_INTEGER;
+			if (en.highlightOffset != null && en.highlightOffset != Entry.NULL_INTEGER) {
+				en.highlightLength = Helper.parseValidInteger(cont, "hotPartEndTime");
+				if (en.highlightLength != null && en.highlightLength > 0)	
+					en.highlightLength -= en.highlightOffset;
+				if (en.highlightLength != null && en.highlightLength <= 0)
+					en.highlightLength = Entry.NULL_INTEGER;
+			}
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "favCount");
 			if (!ext)
@@ -453,6 +498,7 @@ public final class Parser {
 				en.styles = processStyles(cont);
 				en.tags = processTags(cont);
 				en.commentCount = Helper.parseValidInteger(cont, "commentCount");
+				processSimilars(cont);
 			}
 			en.lyrics = processLyrics(o);
 			return en;
