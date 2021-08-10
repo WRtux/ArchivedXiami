@@ -393,7 +393,7 @@ public final class Parser {
 						ens[i].update = Helper.parseValidInteger(o, "gmtModified");
 						ens[i].type = Helper.parseValidInteger(o, "type");
 						ens[i].official = Helper.parseValidBoolean(o, "flagOfficial");
-						ens[i].content = Helper.parseValidString(o, "content");
+						ens[i].contentURL = Helper.parseValidString(o, "lyricUrl");
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid lyric: " + String.valueOf(arr.get(i)));
 					}
@@ -454,12 +454,7 @@ public final class Parser {
 				en.tags = processTags(cont);
 				en.commentCount = Helper.parseValidInteger(cont, "commentCount");
 			}
-			if ((en.playCount != null && en.playCount >= 20000)
-					|| (en.likeCount != null && en.likeCount >= 100)) {
-				en.lyrics = processLyrics(o);
-				if (en.lyrics != null && en.lyrics.length > 0)
-					System.out.println(en.lyrics.length + " lyrics listed.");
-			}
+			en.lyrics = processLyrics(o);
 			return en;
 		}
 		

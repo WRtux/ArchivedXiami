@@ -12,12 +12,12 @@ public class LyricEntry {
 	
 	public Boolean official;
 	
-	public String content;
+	public String contentURL;
 	
-	public LyricEntry(Long id, Long typ, String dat) {
+	public LyricEntry(Long id, Long typ, String url) {
 		this.id = (id != Entry.NULL_INTEGER ? id : null);
 		this.type = typ;
-		this.content = dat;
+		this.contentURL = url;
 	}
 	public LyricEntry(Long id) {
 		this(id, null, null);
@@ -29,7 +29,7 @@ public class LyricEntry {
 		Helper.putValidInteger(o, "update", this.update);
 		Helper.putValidInteger(o, "type", this.type);
 		Helper.putValidBoolean(o, "official", this.official);
-		Helper.putValidString(o, "content", this.content);
+		Helper.putValidString(o, "contentURL", this.contentURL);
 		return o;
 	}
 	
