@@ -142,7 +142,7 @@ public class SongEntry extends Entry {
 		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
 		if (this.singers != null) {
 			JSONArray arr = null;
-			if (this.singers != Entry.nullEntryMap.get(ReferenceEntry[].class)) {
+			if (this.singers != Entry.forNullEntry(ReferenceEntry[].class)) {
 				arr = new JSONArray(this.singers.length);
 				for (ReferenceEntry en : this.singers) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -152,7 +152,7 @@ public class SongEntry extends Entry {
 		}
 		if (this.staffs != null) {
 			JSONArray arr = null;
-			if (this.staffs != Entry.nullEntryMap.get(StaffEntry[].class)) {
+			if (this.staffs != Entry.forNullEntry(StaffEntry[].class)) {
 				arr = new JSONArray(this.staffs.length);
 				for (StaffEntry en : this.staffs) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -169,7 +169,7 @@ public class SongEntry extends Entry {
 		Helper.putValidInteger(o, "highlightLength", this.highlightLength);
 		if (this.infos != null) {
 			JSONArray arr = null;
-			if (this.infos != Entry.nullEntryMap.get(InfoEntry[].class)) {
+			if (this.infos != Entry.forNullEntry(InfoEntry[].class)) {
 				arr = new JSONArray(this.infos.length);
 				for (InfoEntry en : this.infos) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -179,7 +179,7 @@ public class SongEntry extends Entry {
 		}
 		if (this.styles != null) {
 			JSONArray arr = null;
-			if (this.styles != Entry.nullEntryMap.get(StyleEntry[].class)) {
+			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
 				arr = new JSONArray(this.styles.length);
 				for (StyleEntry en : this.styles) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -190,7 +190,7 @@ public class SongEntry extends Entry {
 		Helper.putValidArray(o, "tags", this.tags);
 		if (this.lyrics != null) {
 			JSONArray arr = null;
-			if (this.lyrics != Entry.nullEntryMap.get(LyricEntry[].class)) {
+			if (this.lyrics != Entry.forNullEntry(LyricEntry[].class)) {
 				arr = new JSONArray(this.lyrics.length);
 				for (LyricEntry en : this.lyrics) {
 					arr.add(en != null ? en.toJSON() : null);

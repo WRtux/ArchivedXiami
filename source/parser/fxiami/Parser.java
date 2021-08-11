@@ -101,7 +101,7 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("artists");
 				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i),
 							"artistId", "artistStringId", "artistName");
@@ -122,7 +122,7 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("companies");
 				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i), "id", null, "name");
 					} catch (RuntimeException ex) {
@@ -157,7 +157,7 @@ public final class Parser {
 				JSONArray arr = cont.getJSONArray("songs");
 				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
 				int cnt = 0;
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = Helper.parseValidEntry(o, "songId", "songStringId", "songName");
@@ -182,7 +182,7 @@ public final class Parser {
 				JSONArray arr = cont.getJSONArray("albums");
 				AlbumEntry[] ens = new AlbumEntry[arr.size()];
 				int cnt = 0;
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						if (parseAlbumEntry(arr.getJSONObject(i), false) != null)
 							cnt++;
@@ -280,7 +280,7 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("singerVOs");
 				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i),
 							"artistId", "artistStringId", "artistName");
@@ -301,7 +301,7 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("behindStaffs");
 				StaffEntry[] ens = new StaffEntry[arr.size()];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = new StaffEntry(o.getString("type"));
@@ -329,7 +329,7 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("songDescs");
 				InfoEntry[] ens = new InfoEntry[arr.size()];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = new InfoEntry();
@@ -352,7 +352,7 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("styles");
 				StyleEntry[] ens = new StyleEntry[arr.size()];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = new StyleEntry(o.getLong("styleId"));
@@ -377,7 +377,7 @@ public final class Parser {
 					return new String[0][];
 				JSONArray arr = cont.getJSONArray("tags");
 				String[][] ens = new String[arr.size()][];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = new String[] {o.getString("name"), o.getString("id")};
@@ -400,7 +400,7 @@ public final class Parser {
 				JSONArray arr = cont.getJSONArray(n);
 				SongEntry[] ens = new SongEntry[arr.size()];
 				int cnt = 0;
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						if (parseSongEntry(arr.getJSONObject(i), false) != null)
 							cnt++;
@@ -422,7 +422,7 @@ public final class Parser {
 			try {
 				JSONArray arr = cont.getJSONArray("songLyric");
 				LyricEntry[] ens = new LyricEntry[arr.size()];
-				for (int i = 0, len = arr.size(); i < len; i++) {
+				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = new LyricEntry(o.getLong("id"));

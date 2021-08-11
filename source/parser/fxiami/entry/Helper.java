@@ -146,7 +146,7 @@ public final class Helper {
 	public static boolean putValidArray(JSONObject dest, String k, Object[] arr) {
 		if (arr == null)
 			return false;
-		dest.put(k, arr != Entry.nullEntryMap.get(arr.getClass()) ? arr : null);
+		dest.put(k, arr != Entry.forNullEntry(arr.getClass()) ? arr : null);
 		return true;
 	}
 	
