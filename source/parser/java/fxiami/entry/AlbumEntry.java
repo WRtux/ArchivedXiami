@@ -1,8 +1,11 @@
 package fxiami.entry;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -50,6 +53,12 @@ public class AlbumEntry extends Entry {
 			System.err.printf("ID mismatch for ID: %d, SID: %s, expected %d.%n", id, sid, en.id);
 		}
 		return null;
+	}
+	
+	public static Collection<AlbumEntry> getAll() {
+		Set<AlbumEntry> set = new HashSet<>(idEntryMap.values());
+		set.addAll(sidEntryMap.values());
+		return set;
 	}
 	
 	public static AlbumEntry matchEntry(Long id, String sid) {

@@ -35,20 +35,48 @@ public final class Main {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		if (args.length != 3)
-			throw new IllegalArgumentException();
-		switch (args[0]) {
-		case "export":
-			File[] fs = new File(args[2]).listFiles();
-			Exporter.exportJSONM(args[1], fs, new File(args[1] + ".jsonm"));
-			break;
-		case "parse":
-			Parser.exportJSON(args[1], new File(args[2]), new File(args[1] + ".json"));
-			break;
-		case "index":
-			throw new IllegalStateException();
-		default:
-			throw new IllegalArgumentException();
+		if (args.length == 0) {
+			System.err.println("Missing action argument.");
+			return;
+		}
+		loadData();
+		if (args.length == 1) {
+			switch (args[0]) {
+			case "category":
+				throw new IllegalStateException();
+			default:
+				System.err.println("Unknown action.");
+				break;
+			}
+		} else if (args.length == 3) {
+			switch (args[0]) {
+			case "export":
+				File[] fs = new File(args[2]).listFiles();
+				Exporter.exportJSONM(args[1], fs, new File(args[1] + ".jsonm"));
+				break;
+			case "parse":
+				Parser.exportJSON(args[1], new File(args[2]), new File(args[1] + ".json"));
+				break;
+			case "index":
+				throw new IllegalStateException();
+			default:
+				System.err.println("Unknown action.");
+				break;
+			}
+		} else if (args.length == 4) {
+			switch (args[0]) {
+			case "parse-hybrid":
+				Parser.parseJSONM("artist", new File(args[1]));
+				Parser.parseJSONM("album", new File(args[2]));
+				Parser.parseJSONM("song", new File(args[3]));
+				Parser.exportJSON(new File("hybrid.json"));
+				break;
+			default:
+				System.err.println("Unknown action.");
+				break;
+			}
+		} else {
+			System.err.println("Illegal argument count.");
 		}
 	}
 	

@@ -65,8 +65,8 @@ public final class Parser {
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
-			cont = o.getJSONObject("artistExt");
-			if (cont != null && !cont.isEmpty()) {
+			JSONArray arr = o.getJSONArray("artistExt");
+			if (arr != null && !arr.isEmpty()) {
 				//TODO
 			}
 			return en;
@@ -584,6 +584,56 @@ public final class Parser {
 				}
 			}
 			wtr.endArray();
+			System.out.println("Export completed.");
+		} catch (Exception ex) {
+			System.err.println("Export failed.");
+			throw ex;
+		} finally {
+			wtr.close();
+			System.gc();
+		}
+	}
+	
+	public static void exportJSON(File dest) throws IOException {
+		System.out.println("Exporting...");
+		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
+		wtr.config(SerializerFeature.WriteMapNullValue, true);
+		try {
+			wtr.startObject();
+			wtr.writeKey("artists");
+			wtr.startArray();
+			for (ArtistEntry en : ArtistEntry.getAll()) {
+				try {
+					wtr.writeValue(en.toJSON());
+				} catch (RuntimeException ex) {
+					System.err.println("Unexpected break:");
+					ex.printStackTrace();
+				}
+			}
+			wtr.endArray();
+			wtr.writeKey("albums");
+			wtr.startArray();
+			for (AlbumEntry en : AlbumEntry.getAll()) {
+				try {
+					wtr.writeValue(en.toJSON());
+				} catch (RuntimeException ex) {
+					System.err.println("Unexpected break:");
+					ex.printStackTrace();
+				}
+			}
+			wtr.endArray();
+			wtr.writeKey("songs");
+			wtr.startArray();
+			for (SongEntry en : SongEntry.getAll()) {
+				try {
+					wtr.writeValue(en.toJSON());
+				} catch (RuntimeException ex) {
+					System.err.println("Unexpected break:");
+					ex.printStackTrace();
+				}
+			}
+			wtr.endArray();
+			wtr.endObject();
 			System.out.println("Export completed.");
 		} catch (Exception ex) {
 			System.err.println("Export failed.");
