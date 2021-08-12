@@ -137,12 +137,10 @@ public final class Parser {
 		}
 		
 		static CategoryEntry processCategory(JSONObject cont) {
-			if (!cont.containsKey("categoryId"))
-				return null;
 			try {
-				CategoryEntry en = new CategoryEntry(cont.getLong("categoryId"));
-				en.name = Helper.parseValidString(cont, "albumCategory");
-				return en;
+				Long id = cont.getLong("categoryId");
+				String n = Helper.parseValidString(cont, "albumCategory");
+				return CategoryEntry.getCategory(id, n != Entry.NULL_STRING ? n : null);
 			} catch (RuntimeException ex) {
 				System.out.printf("Not a valid category: %s, %s%n",
 					String.valueOf(cont.get("categoryId")), String.valueOf(cont.get("albumCategory")));
@@ -295,6 +293,23 @@ public final class Parser {
 			}
 		}
 		
+		private static StaffEntry processStaff(JSONObject cont) {
+			StaffEntry en = new StaffEntry(cont.getString("type"));
+			en.name = Helper.parseValidString(cont, "name");
+			try {
+				JSONArray arr = cont.getJSONArray("staffs");
+				en.artists = new ReferenceEntry[arr.size()];
+				for (int i = 0; i < en.artists.length; i++) {
+					JSONObject o = arr.getJSONObject(i);
+					en.artists[i] = Helper.parseValidEntry(o, "id", null, "name");
+				}
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid staff: " + String.valueOf(cont.get("staffs")));
+				en.artists = Entry.forNullEntry(ReferenceEntry[].class);
+			}
+			return en;
+		}
+		
 		static StaffEntry[] processStaffs(JSONObject cont) {
 			if (!cont.containsKey("behindStaffs"))
 				return null;
@@ -303,15 +318,7 @@ public final class Parser {
 				StaffEntry[] ens = new StaffEntry[arr.size()];
 				for (int i = 0; i < ens.length; i++) {
 					try {
-						JSONObject o = arr.getJSONObject(i);
-						ens[i] = new StaffEntry(o.getString("type"));
-						ens[i].name = Helper.parseValidString(o, "name");
-						JSONArray sarr = o.getJSONArray("staffs");
-						ens[i].artists = new ReferenceEntry[sarr.size()];
-						for (int j = 0, slen = sarr.size(); j < slen; j++) {
-							o = sarr.getJSONObject(j);
-							ens[i].artists[j] = Helper.parseValidEntry(o, "id", null, "name");
-						}
+						ens[i] = processStaff(arr.getJSONObject(i));
 					} catch (RuntimeException ex) {
 						System.out.println("Not valid staff: " + String.valueOf(arr.get(i)));
 					}
@@ -355,8 +362,9 @@ public final class Parser {
 				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
-						ens[i] = new StyleEntry(o.getLong("styleId"));
-						ens[i].name = Helper.parseValidString(o, "styleName");
+						Long id = o.getLong("styleId");
+						String n = Helper.parseValidString(o, "styleName");
+						ens[i] = StyleEntry.getStyle(id, n != Entry.NULL_STRING ? n : null);
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid style: " + String.valueOf(arr.get(i)));
 					}
