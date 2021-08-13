@@ -1,13 +1,15 @@
 package fxiami.entry;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
 public class StyleEntry {
 	
-	protected static final Map<Long, StyleEntry> entryMap = new HashMap<>();
+	protected static final Map<Long, StyleEntry> entryMap = new LinkedHashMap<>();
 	
 	public static StyleEntry getStyle(Long id, String n) {
 		StyleEntry en =  entryMap.get(id);
@@ -18,6 +20,10 @@ public class StyleEntry {
 	}
 	public static StyleEntry getStyle(Long id) {
 		return getStyle(id, null);
+	}
+	
+	public static Collection<StyleEntry> getAll() {
+		return new ArrayList<>(entryMap.values());
 	}
 	
 	public final Long genre;

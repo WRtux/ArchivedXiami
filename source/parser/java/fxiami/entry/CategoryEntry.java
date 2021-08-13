@@ -1,13 +1,15 @@
 package fxiami.entry;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
 public class CategoryEntry {
 	
-	protected static final Map<Long, CategoryEntry> entryMap = new HashMap<>();
+	protected static final Map<Long, CategoryEntry> entryMap = new LinkedHashMap<>();
 	
 	public static CategoryEntry getCategory(Long id, String n) {
 		CategoryEntry en = entryMap.get(id);
@@ -18,6 +20,10 @@ public class CategoryEntry {
 	}
 	public static CategoryEntry getCategory(Long id) {
 		return getCategory(id, null);
+	}
+	
+	public static Collection<CategoryEntry> getAll() {
+		return new ArrayList<>(entryMap.values());
 	}
 	
 	public final Long id;
