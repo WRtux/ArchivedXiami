@@ -97,6 +97,8 @@ public final class Parser {
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
 			en.info = Helper.parseValidString(cont, "description");
+			if (en.info != null && en.info.isEmpty())
+				en.info = Entry.NULL_STRING;
 			en.styles = SongParser.processStyles(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			JSONArray arr = o.getJSONArray("artistExt");
@@ -251,9 +253,15 @@ public final class Parser {
 			en.companies = processCompanies(cont);
 			en.category = processCategory(cont);
 			en.discCount = Helper.parseValidInteger(cont, "cdCount");
+			if (en.discCount != null && en.discCount == 0)
+				en.discCount = Entry.NULL_INTEGER;
 			en.songCount = Helper.parseValidInteger(cont, "songCount");
 			en.publishTime = Helper.parseValidInteger(cont, "gmtPublish");
+			if (en.publishTime != null && en.publishTime == 0)
+				en.publishTime = Entry.NULL_INTEGER;
 			en.language = Helper.parseValidString(cont, "language");
+			if (en.language != null && en.language.isEmpty())
+				en.language = Entry.NULL_STRING;
 			Double d = Helper.parseValidFloat(cont, "grade");
 			if (d != null && d != Entry.NULL_FLOAT) {
 				en.grade = Math.round(d.doubleValue() * 10);
@@ -261,12 +269,16 @@ public final class Parser {
 				en.grade = Entry.NULL_INTEGER;
 			}
 			en.gradeCount = Helper.parseValidInteger(cont, "gradeCount");
+			if (en.grade != null && en.grade == 0 && (en.gradeCount == null || en.gradeCount < 10))
+				en.grade = Entry.NULL_INTEGER;
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "collects");
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
 			en.info = Helper.parseValidString(cont, "description");
+			if (en.info != null && en.info.isEmpty())
+				en.info = Entry.NULL_STRING;
 			en.styles = SongParser.processStyles(cont);
 			en.songs = processSongs(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
@@ -509,7 +521,11 @@ public final class Parser {
 			en.artist = processArtist(cont);
 			en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId", "albumName");
 			en.disc = Helper.parseValidInteger(cont, "cdSerial");
+			if (en.disc != null && en.disc == 0)
+				en.disc = Entry.NULL_INTEGER;
 			en.track = Helper.parseValidInteger(cont, "track");
+			if (en.track != null && en.track == 0)
+				en.track = Entry.NULL_INTEGER;
 			en.length = Helper.parseValidInteger(cont, "length");
 			if (en.length != null && en.length == 0)
 				en.length = Entry.NULL_INTEGER;
@@ -517,14 +533,15 @@ public final class Parser {
 			if (en.pace != null && en.pace == 0)
 				en.pace = Entry.NULL_INTEGER;
 			en.highlightOffset = Helper.parseValidInteger(cont, "hotPartStartTime");
-			if (en.highlightOffset != null && en.highlightOffset == 0)
-				en.highlightOffset = Entry.NULL_INTEGER;
 			if (en.highlightOffset != null && en.highlightOffset != Entry.NULL_INTEGER) {
-				en.highlightLength = Helper.parseValidInteger(cont, "hotPartEndTime");
-				if (en.highlightLength != null && en.highlightLength > 0)	
-					en.highlightLength -= en.highlightOffset;
-				if (en.highlightLength != null && en.highlightLength <= 0)
-					en.highlightLength = Entry.NULL_INTEGER;
+				Long t = Helper.parseValidInteger(cont, "hotPartEndTime");
+				if (t != null && t != Entry.NULL_INTEGER)
+					t = t > en.highlightOffset ? t - en.highlightOffset : Entry.NULL_INTEGER;
+				if (en.highlightOffset == 0 && (t == null || t == Entry.NULL_INTEGER)) {
+					en.highlightOffset = Entry.NULL_INTEGER;
+				} else {
+					en.highlightLength = t;
+				}
 			}
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "favCount");
