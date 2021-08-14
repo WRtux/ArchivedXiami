@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class ArtistEntry extends Entry {
@@ -104,6 +105,18 @@ public class ArtistEntry extends Entry {
 	
 	public String logoURL;
 	
+	public String gender;
+	
+	public Long birthday;
+	
+	public String area;
+	
+	public CategoryEntry category;
+	
+	public String info;
+	
+	public StyleEntry[] styles;
+	
 	public Long playCount;
 	public Long likeCount;
 	public Long commentCount;
@@ -124,7 +137,21 @@ public class ArtistEntry extends Entry {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
 		Helper.putValidString(o, "logoURL", this.logoURL);
-		//TODO
+		Helper.putValidString(o, "gender", this.gender);
+		Helper.putValidInteger(o, "birthday", this.birthday);
+		Helper.putValidString(o, "area", this.area);
+		o.put("category", this.category != null ? this.category.toJSON() : null);
+		Helper.putValidString(o, "info", this.info);
+		if (this.styles != null) {
+			JSONArray arr = null;
+			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
+				arr = new JSONArray(this.styles.length);
+				for (StyleEntry en : this.styles) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("styles", arr);
+		}
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);
 		Helper.putValidInteger(o, "commentCount", this.commentCount);

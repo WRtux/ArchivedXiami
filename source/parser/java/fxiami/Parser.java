@@ -47,6 +47,30 @@ public final class Parser {
 			return en;
 		}
 		
+		static String processGender(JSONObject cont) {
+			if (!cont.containsKey("gender"))
+				return null;
+			try {
+				String str = cont.getString("gender");
+				switch (str) {
+				case "":
+					str = Entry.NULL_STRING;
+					break;
+				case "M":
+				case "F":
+				case "B":
+				case "N":
+					break;
+				default:
+					throw new RuntimeException();
+				}
+				return str;
+			} catch (RuntimeException ex) {
+				System.out.println("Not a valid gender: " + String.valueOf(cont.get("gender")));
+				return Entry.NULL_STRING;
+			}
+		}
+		
 		public static ArtistEntry parseArtistEntry(JSONObject o, boolean ext) {
 			JSONObject cont = ext ? o.getJSONObject("artistDetail") : o;
 			if (cont == null || cont.isEmpty())
@@ -61,10 +85,20 @@ public final class Parser {
 			if (en.subName != null && en.subName.isEmpty())
 				en.subName = Entry.NULL_STRING;
 			en.logoURL = Helper.parseValidString(cont, "artistLogo");
-			//TODO
+			en.gender = processGender(cont);
+			en.birthday = Helper.parseValidInteger(cont, "birthday");
+			en.area = Helper.parseValidString(cont, "area");
+			if (en.area != null && en.area.isEmpty())
+				en.area = Entry.NULL_STRING;
+			en.category = AlbumParser.processCategory(cont);
+			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			en.likeCount = Helper.parseValidInteger(cont, "countLikes");
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
+			en.info = Helper.parseValidString(cont, "description");
+			en.styles = SongParser.processStyles(cont);
+			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			JSONArray arr = o.getJSONArray("artistExt");
 			if (arr != null && !arr.isEmpty()) {
 				//TODO
@@ -140,7 +174,10 @@ public final class Parser {
 			try {
 				Long id = cont.getLong("categoryId");
 				String n = Helper.parseValidString(cont, "albumCategory");
-				return CategoryEntry.getCategory(id, n != Entry.NULL_STRING ? n : null);
+				CategoryEntry en = CategoryEntry.getCategory(id, n != Entry.NULL_STRING ? n : null);
+				if (id != null && en == null)
+					System.out.printf("No matching category for %d, %s.%n", id, n);
+				return en;
 			} catch (RuntimeException ex) {
 				System.out.printf("Not a valid category: %s, %s%n",
 					String.valueOf(cont.get("categoryId")), String.valueOf(cont.get("albumCategory")));
@@ -365,6 +402,8 @@ public final class Parser {
 						Long id = o.getLong("styleId");
 						String n = Helper.parseValidString(o, "styleName");
 						ens[i] = StyleEntry.getStyle(id, n != Entry.NULL_STRING ? n : null);
+						if (id != null && ens[i] == null)
+							System.out.printf("No matching style for %d, %s.%n", id, n);
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid style: " + String.valueOf(arr.get(i)));
 					}

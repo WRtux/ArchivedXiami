@@ -36,7 +36,7 @@ public class CategoryEntry {
 		this.id = id;
 		this.name = n;
 		if (entryMap.containsKey(id))
-			System.out.printf("Duplicate category: %d, %s.%n", id, entryMap.get(id).name);
+			System.out.printf("Duplicate category: %d, %s%n", id, entryMap.get(id).name);
 		entryMap.put(id, this);
 	}
 	public CategoryEntry(Long id) {

@@ -38,7 +38,7 @@ public class StyleEntry {
 		this.id = id;
 		this.name = n;
 		if (entryMap.containsKey(id))
-			System.out.printf("Duplicate style: %d-%d, %s.%n", gen, id, entryMap.get(id).name);
+			System.out.printf("Duplicate style: %d-%d, %s%n", gen, id, entryMap.get(id).name);
 		entryMap.put(id, this);
 	}
 	public StyleEntry(Long gen, Long id) {
@@ -47,8 +47,7 @@ public class StyleEntry {
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject(true);
-		if (this.genre != null)
-			o.put("genre", this.genre);
+		o.put("genre", this.genre);
 		o.put("id", this.id);
 		Helper.putValidString(o, "name", this.name);
 		return o;
