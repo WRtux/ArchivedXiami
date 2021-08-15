@@ -1,18 +1,14 @@
 package fxiami;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONWriter;
 
 import fxiami.entry.CategoryEntry;
 import fxiami.entry.StyleEntry;
@@ -69,13 +65,7 @@ public final class Main {
 			Parser.parseJSONM("artist", new File(args[1]));
 			Parser.parseJSONM("album", new File(args[2]));
 			Parser.parseJSONM("song", new File(args[3]));
-			JSONWriter wtr = new JSONWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream("style.json"), "UTF-8")));
-			wtr.startArray();
-			for (StyleEntry en : StyleEntry.getAll()) {
-				wtr.writeValue(en.toJSON());
-			}
-			wtr.endArray();
-			wtr.close();
+			Parser.exportJSON(new File("hybrid.json"));
 			break;
 		case "index":
 			if (args.length != 3)

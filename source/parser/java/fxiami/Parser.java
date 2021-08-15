@@ -78,9 +78,29 @@ public final class Parser {
 			ArtistEntry en = processEntry(cont, ext);
 			if (en == null)
 				return null;
+			en.name = Helper.parseValidString(cont, "artistName");
+			if (ext)
+				System.out.println("Processing " + en.name + "...");
+			en.subName = Helper.parseValidString(cont, "alias");
+			if (en.subName != null && en.subName.isEmpty())
+				en.subName = Entry.NULL_STRING;
+			en.logoURL = Helper.parseValidString(cont, "artistLogo");
+			en.gender = processGender(cont);
+			en.birthday = Helper.parseValidInteger(cont, "birthday");
+			en.area = Helper.parseValidString(cont, "area");
+			if (en.area != null && en.area.isEmpty())
+				en.area = Entry.NULL_STRING;
+			en.category = AlbumParser.processCategory(cont);
+			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			en.likeCount = Helper.parseValidInteger(cont, "countLikes");
 			if (!ext)
 				return en;
+			en.update = Helper.parseValidInteger(o, "update");
+			en.info = Helper.parseValidString(cont, "description");
+			if (en.info != null && en.info.isEmpty())
+				en.info = Entry.NULL_STRING;
 			en.styles = SongParser.processStyles(cont);
+			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			JSONArray arr = o.getJSONArray("artistExt");
 			if (arr != null && !arr.isEmpty()) {
 				//TODO
@@ -222,10 +242,46 @@ public final class Parser {
 			AlbumEntry en = processEntry(cont, ext);
 			if (en == null)
 				return null;
+			en.name = Helper.parseValidString(cont, "albumName");
+			if (ext)
+				System.out.println("Processing " + en.name + "...");
+			en.subName = Helper.parseValidString(cont, "subName");
+			if (en.subName != null && en.subName.isEmpty())
+				en.subName = Entry.NULL_STRING;
+			en.logoURL = Helper.parseValidString(cont, "albumLogo");
+			en.artists = processArtists(cont);
+			en.companies = processCompanies(cont);
+			en.category = processCategory(cont);
+			en.discCount = Helper.parseValidInteger(cont, "cdCount");
+			if (en.discCount != null && en.discCount == 0)
+				en.discCount = Entry.NULL_INTEGER;
+			en.songCount = Helper.parseValidInteger(cont, "songCount");
+			en.publishTime = Helper.parseValidInteger(cont, "gmtPublish");
+			if (en.publishTime != null && en.publishTime == 0)
+				en.publishTime = Entry.NULL_INTEGER;
+			en.language = Helper.parseValidString(cont, "language");
+			if (en.language != null && en.language.isEmpty())
+				en.language = Entry.NULL_STRING;
+			Double d = Helper.parseValidFloat(cont, "grade");
+			if (d != null && d != Entry.NULL_FLOAT) {
+				en.grade = Math.round(d.doubleValue() * 10);
+			} else if (d == Entry.NULL_FLOAT) {
+				en.grade = Entry.NULL_INTEGER;
+			}
+			en.gradeCount = Helper.parseValidInteger(cont, "gradeCount");
+			if (en.grade != null && en.grade == 0 && (en.gradeCount == null || en.gradeCount < 10))
+				en.grade = Entry.NULL_INTEGER;
+			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			en.likeCount = Helper.parseValidInteger(cont, "collects");
 			if (!ext)
 				return en;
+			en.update = Helper.parseValidInteger(o, "update");
+			en.info = Helper.parseValidString(cont, "description");
+			if (en.info != null && en.info.isEmpty())
+				en.info = Entry.NULL_STRING;
 			en.styles = SongParser.processStyles(cont);
 			en.songs = processSongs(cont);
+			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			cont = o.getJSONObject("artistAlbums");
 			if (cont != null && !cont.isEmpty())
 				processSimilars(cont);
@@ -355,16 +411,11 @@ public final class Parser {
 				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
-						String url = o.getString("url");
-						if (url != null) {
-							int a = url.indexOf("style/") + 6, b = url.indexOf('?', a);
-							Long gen = Long.valueOf(url.substring(b + 1));
-							Long id = Long.valueOf(url.substring(a, b));
-							String n = o.getString("styleName");
-							ens[i] = StyleEntry.getStyle(id, n);
-							if (ens[i] == null)
-								ens[i] = new StyleEntry(gen, id, n);
-						}
+						Long id = o.getLong("styleId");
+						String n = Helper.parseValidString(o, "styleName");
+						ens[i] = StyleEntry.getStyle(id, n != Entry.NULL_STRING ? n : null);
+						if (id != null && ens[i] == null)
+							System.out.printf("No matching style for %d, %s.%n", id, n);
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid style: " + String.valueOf(arr.get(i)));
 					}
@@ -456,19 +507,64 @@ public final class Parser {
 			SongEntry en = processEntry(cont, ext);
 			if (en == null)
 				return null;
+			en.name = Helper.parseValidString(cont, "songName");
+			if (ext)
+				System.out.println("Processing " + en.name + "...");
+			en.subName = Helper.parseValidString(cont, "newSubName");
+			if (en.subName == null || en.subName == Entry.NULL_STRING || en.subName.isEmpty())
+				en.subName = Helper.parseValidString(cont, "subName");
+			if (en.subName != null && en.subName.isEmpty())
+				en.subName = Entry.NULL_STRING;
+			en.translation = Helper.parseValidString(cont, "translation");
+			if (en.translation != null && en.translation.isEmpty())
+				en.translation = Entry.NULL_STRING;
+			en.artist = processArtist(cont);
+			en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId", "albumName");
+			en.disc = Helper.parseValidInteger(cont, "cdSerial");
+			if (en.disc != null && en.disc == 0)
+				en.disc = Entry.NULL_INTEGER;
+			en.track = Helper.parseValidInteger(cont, "track");
+			if (en.track != null && en.track == 0)
+				en.track = Entry.NULL_INTEGER;
+			en.length = Helper.parseValidInteger(cont, "length");
+			if (en.length != null && en.length == 0)
+				en.length = Entry.NULL_INTEGER;
+			en.pace = Helper.parseValidInteger(cont, "pace");
+			if (en.pace != null && en.pace == 0)
+				en.pace = Entry.NULL_INTEGER;
+			en.highlightOffset = Helper.parseValidInteger(cont, "hotPartStartTime");
+			if (en.highlightOffset != null && en.highlightOffset != Entry.NULL_INTEGER) {
+				Long t = Helper.parseValidInteger(cont, "hotPartEndTime");
+				if (t != null && t != Entry.NULL_INTEGER)
+					t = t > en.highlightOffset ? t - en.highlightOffset : Entry.NULL_INTEGER;
+				if (en.highlightOffset == 0 && (t == null || t == Entry.NULL_INTEGER)) {
+					en.highlightOffset = Entry.NULL_INTEGER;
+				} else {
+					en.highlightLength = t;
+				}
+			}
+			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			en.likeCount = Helper.parseValidInteger(cont, "favCount");
 			if (!ext)
 				return en;
+			en.update = Helper.parseValidInteger(o, "update");
 			cont = o.getJSONObject("songExt");
 			if (cont != null && !cont.isEmpty()) {
+				en.singers = processSingers(cont);
+				en.staffs = processStaffs(cont);
 				try {
 					if (AlbumParser.parseAlbumEntry(cont.getJSONObject("album"), false) != null)
 						System.out.println("Album extension added.");
 				} catch (RuntimeException ex) {
 					System.out.println("Not a valid album: " + String.valueOf(cont.get("album")));
 				}
+				en.infos = processInfos(cont); 
 				en.styles = processStyles(cont);
+				en.tags = processTags(cont);
+				en.commentCount = Helper.parseValidInteger(cont, "commentCount");
 				processSimilars(cont);
 			}
+			en.lyrics = processLyrics(o);
 			return en;
 		}
 		
