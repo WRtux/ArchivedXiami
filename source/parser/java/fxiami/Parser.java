@@ -71,6 +71,109 @@ public final class Parser {
 			}
 		}
 		
+		static ArtistEntry[] processSimilars(JSONObject cont) {
+			String n = "similaryArtists";
+			if (!cont.containsKey(n))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray(n);
+				ArtistEntry[] ens = new ArtistEntry[arr.size()];
+				int cnt = 0;
+				for (int i = 0; i < ens.length; i++) {
+					try {
+						ens[i] = parseArtistEntry(arr.getJSONObject(i), false);
+						if (ens[i] != null)
+							cnt++;
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid artist: " + String.valueOf(arr.get(i)));
+					}
+				}
+				System.out.printf("%d/%d artists added.%n", cnt, ens.length);
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid artists: " + String.valueOf(cont.get(n)));
+				return Entry.forNullEntry(ArtistEntry[].class);
+			}
+		}
+		
+		static AlbumEntry[] processAlbums(JSONObject cont) {
+			if (!cont.containsKey("albums"))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray("albums");
+				AlbumEntry[] ens = new AlbumEntry[arr.size()];
+				int cnt = 0;
+				for (int i = 0; i < ens.length; i++) {
+					try {
+						ens[i] = AlbumParser.parseAlbumEntry(arr.getJSONObject(i), false);
+						if (ens[i] != null)
+							cnt++;
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid album: " + String.valueOf(arr.get(i)));
+					}
+				}
+				System.out.printf("%d/%d albums added.%n", cnt, ens.length);
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid albums: " + String.valueOf(cont.get("albums")));
+				return Entry.forNullEntry(AlbumEntry[].class);
+			}
+		}
+		
+		static SongEntry[] processSongs(JSONObject cont) {
+			if (!cont.containsKey("songs"))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray("songs");
+				SongEntry[] ens = new SongEntry[arr.size()];
+				int cnt = 0;
+				for (int i = 0; i < ens.length; i++) {
+					try {
+						ens[i] = SongParser.parseSongEntry(arr.getJSONObject(i), false);
+						if (ens[i] != null)
+							cnt++;
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid song: " + String.valueOf(arr.get(i)));
+					}
+				}
+				System.out.printf("%d/%d songs added.%n", cnt, ens.length);
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid songs: " + String.valueOf(cont.get("songs")));
+				return Entry.forNullEntry(SongEntry[].class);
+			}
+		}
+		
+		static void processCard(JSONObject cont) {
+			if (!cont.containsKey("groupKey"))
+				return;
+			try {
+				String n = cont.getString("groupKey");
+				JSONArray arr = cont.getJSONArray("cards");
+				if (arr.size() > 1)
+					System.err.println("Multiple cards: " + arr.size());
+				switch (n) {
+				case "ARTIST_SIMILARIES":
+					processSimilars(arr.getJSONObject(0));
+					break;
+				case "ARTIST_ALBUMS":
+					processAlbums(arr.getJSONObject(0));
+					break;
+				case "ARTIST_SONGS":
+				case "ARTIST_DEMOS":
+					processSongs(arr.getJSONObject(0));
+					break;
+				case "ARTIST_MVS":
+					break;
+				default:
+					System.out.println("Not a valid group name: " + n);
+				}
+			} catch (RuntimeException ex) {
+				System.out.printf("Not a valid card: %s, %s%n",
+					String.valueOf(cont.get("groupKey")), String.valueOf(cont.get("cards")));
+			}
+		}
+		
 		public static ArtistEntry parseArtistEntry(JSONObject o, boolean ext) {
 			JSONObject cont = ext ? o.getJSONObject("artistDetail") : o;
 			if (cont == null || cont.isEmpty())
@@ -103,7 +206,11 @@ public final class Parser {
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			JSONArray arr = o.getJSONArray("artistExt");
 			if (arr != null && !arr.isEmpty()) {
-				//TODO
+				for (int i = 0, len = arr.size(); i < len; i++) {
+					cont = arr.getJSONObject(i);
+					if (cont != null && !cont.isEmpty())
+						processCard(cont);
+				}
 			}
 			return en;
 		}
@@ -221,7 +328,8 @@ public final class Parser {
 				int cnt = 0;
 				for (int i = 0; i < ens.length; i++) {
 					try {
-						if (parseAlbumEntry(arr.getJSONObject(i), false) != null)
+						ens[i] = parseAlbumEntry(arr.getJSONObject(i), false);
+						if (ens[i] != null)
 							cnt++;
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid album: " + String.valueOf(arr.get(i)));
@@ -461,7 +569,8 @@ public final class Parser {
 				int cnt = 0;
 				for (int i = 0; i < ens.length; i++) {
 					try {
-						if (parseSongEntry(arr.getJSONObject(i), false) != null)
+						ens[i] = parseSongEntry(arr.getJSONObject(i), false);
+						if (ens[i] != null)
 							cnt++;
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid song: " + String.valueOf(arr.get(i)));
