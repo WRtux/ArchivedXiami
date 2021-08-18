@@ -5,8 +5,16 @@ import com.alibaba.fastjson.JSONObject;
 
 public final class Helper {
 	
-	public static boolean isNullFloat(double num) {
+	public static boolean isNullFloatValue(double num) {
 		return Double.doubleToRawLongBits(num) == Double.doubleToRawLongBits(Entry.NULL_FLOAT);
+	}
+	
+	public static boolean isNullArray(Object[] arr) {
+		return arr != null && arr == Entry.forNullEntry(arr.getClass());
+	}
+	
+	public static boolean isEmptyArray(Object[] arr) {
+		return arr != null && arr != Entry.forNullEntry(arr.getClass()) && arr.length == 0;
 	}
 	
 	public static Long parseValidInteger(JSONObject o, String k) {

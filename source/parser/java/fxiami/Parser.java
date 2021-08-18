@@ -159,7 +159,7 @@ public final class Parser {
 			en.birthday = Helper.parseValidInteger(cont, "birthday");
 			en.area = Helper.parseValidString(cont, "area");
 			if (en.area != null && en.area.isEmpty())
-				en.area = Entry.NULL_STRING;
+				en.area = null;
 			en.category = AlbumParser.processCategory(cont);
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "countLikes");
@@ -251,7 +251,7 @@ public final class Parser {
 				Long id = cont.getLong("categoryId");
 				String n = Helper.parseValidString(cont, "albumCategory");
 				CategoryEntry en = CategoryEntry.getCategory(id, n != Entry.NULL_STRING ? n : null);
-				if (id != null && en == null)
+				if (id != null && id != 0 && en == null)
 					System.out.printf("No matching category for %d, %s.%n", id, n);
 				return en;
 			} catch (RuntimeException ex) {
@@ -329,14 +329,14 @@ public final class Parser {
 			en.category = processCategory(cont);
 			en.discCount = Helper.parseValidInteger(cont, "cdCount");
 			if (en.discCount != null && en.discCount == 0)
-				en.discCount = Entry.NULL_INTEGER;
+				en.discCount = null;
 			en.songCount = Helper.parseValidInteger(cont, "songCount");
 			en.publishTime = Helper.parseValidInteger(cont, "gmtPublish");
 			if (en.publishTime != null && en.publishTime == 0)
-				en.publishTime = Entry.NULL_INTEGER;
+				en.publishTime = null;
 			en.language = Helper.parseValidString(cont, "language");
 			if (en.language != null && en.language.isEmpty())
-				en.language = Entry.NULL_STRING;
+				en.language = null;
 			Double d = Helper.parseValidFloat(cont, "grade");
 			if (d != null && d != Entry.NULL_FLOAT) {
 				en.grade = Math.round(d.doubleValue() * 10);
@@ -489,7 +489,7 @@ public final class Parser {
 						Long id = o.getLong("styleId");
 						String n = Helper.parseValidString(o, "styleName");
 						ens[i] = StyleEntry.getStyle(id, n != Entry.NULL_STRING ? n : null);
-						if (id != null && ens[i] == null)
+						if (id != null && id != 0 && ens[i] == null)
 							System.out.printf("No matching style for %d, %s.%n", id, n);
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid style: " + String.valueOf(arr.get(i)));
@@ -514,7 +514,7 @@ public final class Parser {
 				for (int i = 0; i < ens.length; i++) {
 					try {
 						JSONObject o = arr.getJSONObject(i);
-						ens[i] = new String[] {o.getString("name"), o.getString("id")};
+						ens[i] = new String[] {o.getString("id"), o.getString("name")};
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid tag: " + String.valueOf(arr.get(i)));
 					}
@@ -598,23 +598,23 @@ public final class Parser {
 			en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId", "albumName");
 			en.disc = Helper.parseValidInteger(cont, "cdSerial");
 			if (en.disc != null && en.disc == 0)
-				en.disc = Entry.NULL_INTEGER;
+				en.disc = null;
 			en.track = Helper.parseValidInteger(cont, "track");
 			if (en.track != null && en.track == 0)
 				en.track = Entry.NULL_INTEGER;
 			en.length = Helper.parseValidInteger(cont, "length");
 			if (en.length != null && en.length == 0)
-				en.length = Entry.NULL_INTEGER;
+				en.length = null;
 			en.pace = Helper.parseValidInteger(cont, "pace");
 			if (en.pace != null && en.pace == 0)
-				en.pace = Entry.NULL_INTEGER;
+				en.pace = null;
 			en.highlightOffset = Helper.parseValidInteger(cont, "hotPartStartTime");
 			if (en.highlightOffset != null && en.highlightOffset != Entry.NULL_INTEGER) {
 				Long t = Helper.parseValidInteger(cont, "hotPartEndTime");
 				if (t != null && t != Entry.NULL_INTEGER)
 					t = t > en.highlightOffset ? t - en.highlightOffset : Entry.NULL_INTEGER;
 				if (en.highlightOffset == 0 && (t == null || t == Entry.NULL_INTEGER)) {
-					en.highlightOffset = Entry.NULL_INTEGER;
+					en.highlightOffset = null;
 				} else {
 					en.highlightLength = t;
 				}
@@ -634,7 +634,9 @@ public final class Parser {
 				} catch (RuntimeException ex) {
 					System.out.println("Not a valid album: " + String.valueOf(cont.get("album")));
 				}
-				en.infos = processInfos(cont); 
+				en.infos = processInfos(cont);
+				if (Helper.isEmptyArray(en.infos))
+					en.infos = null;
 				en.styles = processStyles(cont);
 				en.tags = processTags(cont);
 				en.commentCount = Helper.parseValidInteger(cont, "commentCount");
