@@ -120,11 +120,11 @@ public class SongEntry extends Entry {
 	public Long highlightOffset;
 	public Long highlightLength;
 	
-	public InfoEntry[] infos;
-	
 	public StyleEntry[] styles;
 	
 	public String[][] tags;
+	
+	public InfoEntry[] infos;
 	
 	public LyricEntry[] lyrics;
 	
@@ -176,16 +176,6 @@ public class SongEntry extends Entry {
 		Helper.putValidInteger(o, "pace", this.pace);
 		Helper.putValidInteger(o, "highlightOffset", this.highlightOffset);
 		Helper.putValidInteger(o, "highlightLength", this.highlightLength);
-		if (this.infos != null) {
-			JSONArray arr = null;
-			if (this.infos != Entry.forNullEntry(InfoEntry[].class)) {
-				arr = new JSONArray(this.infos.length);
-				for (InfoEntry en : this.infos) {
-					arr.add(en != null ? en.toJSON() : null);
-				}
-			}
-			o.put("infos", arr);
-		}
 		if (this.styles != null) {
 			JSONArray arr = null;
 			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
@@ -197,6 +187,16 @@ public class SongEntry extends Entry {
 			o.put("styles", arr);
 		}
 		Helper.putValidArray(o, "tags", this.tags);
+		if (this.infos != null) {
+			JSONArray arr = null;
+			if (this.infos != Entry.forNullEntry(InfoEntry[].class)) {
+				arr = new JSONArray(this.infos.length);
+				for (InfoEntry en : this.infos) {
+					arr.add(en != null ? en.toJSON() : null);
+				}
+			}
+			o.put("infos", arr);
+		}
 		if (this.lyrics != null) {
 			JSONArray arr = null;
 			if (this.lyrics != Entry.forNullEntry(LyricEntry[].class)) {

@@ -166,10 +166,10 @@ public final class Parser {
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
+			en.styles = SongParser.processStyles(cont);
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
 				en.info = Entry.NULL_STRING;
-			en.styles = SongParser.processStyles(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			JSONArray arr = o.getJSONArray("artistExt");
 			if (arr != null && !arr.isEmpty()) {
@@ -351,10 +351,10 @@ public final class Parser {
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
+			en.styles = SongParser.processStyles(cont);
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
 				en.info = Entry.NULL_STRING;
-			en.styles = SongParser.processStyles(cont);
 			en.songs = processSongs(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			cont = o.getJSONObject("artistAlbums");
@@ -454,29 +454,6 @@ public final class Parser {
 			}
 		}
 		
-		static InfoEntry[] processInfos(JSONObject cont) {
-			if (!cont.containsKey("songDescs"))
-				return null;
-			try {
-				JSONArray arr = cont.getJSONArray("songDescs");
-				InfoEntry[] ens = new InfoEntry[arr.size()];
-				for (int i = 0; i < ens.length; i++) {
-					try {
-						JSONObject o = arr.getJSONObject(i);
-						ens[i] = new InfoEntry();
-						ens[i].title = Helper.parseValidString(o, "title");
-						ens[i].content = Helper.parseValidString(o, "desc");
-					} catch (RuntimeException ex) {
-						System.out.println("Not valid info: " + String.valueOf(arr.get(i)));
-					}
-				}
-				return ens;
-			} catch (RuntimeException ex) {
-				System.out.println("Not valid infos: " + String.valueOf(cont.get("songDescs")));
-				return Entry.forNullEntry(InfoEntry[].class);
-			}
-		}
-		
 		static StyleEntry[] processStyles(JSONObject cont) {
 			if (!cont.containsKey("styles"))
 				return null;
@@ -523,6 +500,29 @@ public final class Parser {
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid tags: " + String.valueOf(cont.get("songTag")));
 				return Entry.forNullEntry(String[][].class);
+			}
+		}
+		
+		static InfoEntry[] processInfos(JSONObject cont) {
+			if (!cont.containsKey("songDescs"))
+				return null;
+			try {
+				JSONArray arr = cont.getJSONArray("songDescs");
+				InfoEntry[] ens = new InfoEntry[arr.size()];
+				for (int i = 0; i < ens.length; i++) {
+					try {
+						JSONObject o = arr.getJSONObject(i);
+						ens[i] = new InfoEntry();
+						ens[i].title = Helper.parseValidString(o, "title");
+						ens[i].content = Helper.parseValidString(o, "desc");
+					} catch (RuntimeException ex) {
+						System.out.println("Not valid info: " + String.valueOf(arr.get(i)));
+					}
+				}
+				return ens;
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid infos: " + String.valueOf(cont.get("songDescs")));
+				return Entry.forNullEntry(InfoEntry[].class);
 			}
 		}
 		
@@ -634,11 +634,11 @@ public final class Parser {
 				} catch (RuntimeException ex) {
 					System.out.println("Not a valid album: " + String.valueOf(cont.get("album")));
 				}
+				en.styles = processStyles(cont);
+				en.tags = processTags(cont);
 				en.infos = processInfos(cont);
 				if (Helper.isEmptyArray(en.infos))
 					en.infos = null;
-				en.styles = processStyles(cont);
-				en.tags = processTags(cont);
 				en.commentCount = Helper.parseValidInteger(cont, "commentCount");
 				processSimilars(cont);
 			}

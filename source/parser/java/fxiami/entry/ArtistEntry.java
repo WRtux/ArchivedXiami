@@ -113,9 +113,9 @@ public class ArtistEntry extends Entry {
 	
 	public CategoryEntry category;
 	
-	public String info;
-	
 	public StyleEntry[] styles;
+	
+	public String info;
 	
 	public Long playCount;
 	public Long likeCount;
@@ -141,7 +141,6 @@ public class ArtistEntry extends Entry {
 		Helper.putValidInteger(o, "birthday", this.birthday);
 		Helper.putValidString(o, "area", this.area);
 		o.put("category", this.category != null ? this.category.toJSON() : null);
-		Helper.putValidString(o, "info", this.info);
 		if (this.styles != null) {
 			JSONArray arr = null;
 			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
@@ -152,6 +151,7 @@ public class ArtistEntry extends Entry {
 			}
 			o.put("styles", arr);
 		}
+		Helper.putValidString(o, "info", this.info);
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);
 		Helper.putValidInteger(o, "commentCount", this.commentCount);

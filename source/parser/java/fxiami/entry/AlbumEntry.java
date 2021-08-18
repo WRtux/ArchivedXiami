@@ -117,9 +117,9 @@ public class AlbumEntry extends Entry {
 	
 	public String language;
 	
-	public String info;
-	
 	public StyleEntry[] styles;
+	
+	public String info;
 	
 	public ReferenceEntry[] songs;
 	
@@ -171,7 +171,6 @@ public class AlbumEntry extends Entry {
 		Helper.putValidInteger(o, "songCount", this.songCount);
 		Helper.putValidInteger(o, "publishTime", this.publishTime);
 		Helper.putValidString(o, "language", this.language);
-		Helper.putValidString(o, "info", this.info);
 		if (this.styles != null) {
 			JSONArray arr = null;
 			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
@@ -182,6 +181,7 @@ public class AlbumEntry extends Entry {
 			}
 			o.put("styles", arr);
 		}
+		Helper.putValidString(o, "info", this.info);
 		if (this.songs != null) {
 			JSONArray arr = null;
 			if (this.songs != Entry.forNullEntry(ReferenceEntry[].class)) {
