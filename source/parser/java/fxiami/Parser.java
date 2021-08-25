@@ -703,7 +703,7 @@ public final class Parser {
 		}
 	}
 	
-	static void exportArray(Collection<? extends Entry> co, JSONWriter wtr) {
+	static void writeArray(Collection<? extends Entry> co, JSONWriter wtr) {
 		wtr.startArray();
 		for (Entry en : co) {
 			try {
@@ -722,7 +722,7 @@ public final class Parser {
 		wtr.config(SerializerFeature.WriteMapNullValue, true);
 		try {
 			System.out.println("Exporting...");
-			exportArray(li, wtr);
+			writeArray(li, wtr);
 			System.out.println("Export completed.");
 		} catch (Exception ex) {
 			System.err.println("Export failed.");
@@ -740,11 +740,11 @@ public final class Parser {
 			System.out.println("Exporting...");
 			wtr.startObject();
 			wtr.writeKey("artists");
-			exportArray(ArtistEntry.getAll(), wtr);
+			writeArray(ArtistEntry.getAll(), wtr);
 			wtr.writeKey("albums");
-			exportArray(AlbumEntry.getAll(), wtr);
+			writeArray(AlbumEntry.getAll(), wtr);
 			wtr.writeKey("songs");
-			exportArray(SongEntry.getAll(), wtr);
+			writeArray(SongEntry.getAll(), wtr);
 			wtr.endObject();
 			System.out.println("Export completed.");
 		} catch (Exception ex) {
