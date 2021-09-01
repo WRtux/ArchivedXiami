@@ -68,6 +68,8 @@ public final class Indexer {
 				Set<String> set = new HashSet<>();
 				if (en.subName != null && en.subName != Entry.NULL_STRING)
 					set.add(en.subName);
+				if (en.translation != null && en.translation != Entry.NULL_STRING)
+					set.add(en.translation);
 				if (en.artist != null && en.artist.name != null && en.artist.name != Entry.NULL_STRING)
 					set.add(en.artist.name);
 				if (en.singers != null && !Helper.isNullArray(en.singers)) {
@@ -95,26 +97,25 @@ public final class Indexer {
 				offs[1] = rf.getFilePointer() - off;
 				rf.write(en.toJSON().toJSONString().getBytes("UTF-8"));
 				offs[2] = rf.getFilePointer() - off - offs[1];
-				rf.writeByte(',');
+				rf.writeByte(0x1E);
 			}
-			rf.writeByte('\n');
+			rf.writeByte(0x1D);
 			for (AlbumEntry en : AlbumEntry.getAll()) {
 				long[] offs = mapOff.get(en);
 				offs[1] = rf.getFilePointer() - off;
 				rf.write(en.toJSON().toJSONString().getBytes("UTF-8"));
 				offs[2] = rf.getFilePointer() - off - offs[1];
-				rf.writeByte(',');
+				rf.writeByte(0x1E);
 			}
-			rf.writeByte('\n');
+			rf.writeByte(0x1D);
 			for (SongEntry en : SongEntry.getAll()) {
 				long[] offs = mapOff.get(en);
 				offs[1] = rf.getFilePointer() - off;
 				rf.write(en.toJSON().toJSONString().getBytes("UTF-8"));
 				offs[2] = rf.getFilePointer() - off - offs[1];
-				rf.writeByte(',');
+				rf.writeByte(0x1E);
 			}
-			rf.seek(rf.getFilePointer() - 1);
-			rf.writeByte(0x00);
+			rf.writeByte(0x1C);
 			cur = rf.getFilePointer();
 			rf.seek(off - 4);
 			rf.writeInt((int)(cur - off));
