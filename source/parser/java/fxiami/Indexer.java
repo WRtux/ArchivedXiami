@@ -37,6 +37,7 @@ public final class Indexer {
 	public static void exportIndex(File dest) throws IOException {
 		RandomAccessFile rf = new RandomAccessFile(dest, "rw");
 		try {
+			System.out.println("Indexing...");
 			long off, cur;
 			Map<Entry, long[]> mapOff = new LinkedHashMap<>();
 			rf.writeInt(0xFE581A4D);
@@ -124,6 +125,10 @@ public final class Indexer {
 				rf.writeInt((int)offs[1]);
 				rf.writeInt((int)offs[2]);
 			}
+			System.out.println("Index complete.");
+		} catch (Exception ex) {
+			System.err.println("Index failed.");
+			throw ex;
 		} finally {
 			rf.close();
 			System.gc();

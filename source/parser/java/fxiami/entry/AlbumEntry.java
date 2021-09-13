@@ -61,6 +61,11 @@ public class AlbumEntry extends Entry {
 		return set;
 	}
 	
+	public static void clearAll() {
+		idEntryMap.clear();
+		sidEntryMap.clear();
+	}
+	
 	public static AlbumEntry matchEntry(Long id, String sid) {
 		AlbumEntry en = idEntryMap.get(id);
 		if (en != null) {

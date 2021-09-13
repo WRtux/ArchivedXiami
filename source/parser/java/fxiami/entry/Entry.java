@@ -1,6 +1,7 @@
 package fxiami.entry;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,16 @@ public abstract class Entry {
 		nullEntryMap.put(Object[].class, NULL_OBJECT_ARRAY);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <T> T forNullEntry(Class<T> cls) {
+		T o = (T)nullEntryMap.get(cls);
+		if (o == null && cls.isArray()) {
+			o = (T)Array.newInstance(cls.getComponentType(), 0);
+			nullEntryMap.put(cls, o);
+		}
+		return o;
+	}
+	
 	public static Class<? extends Entry> getEntryClass(String typ) {
 		switch (typ) {
 		case "artist":
@@ -38,14 +49,24 @@ public abstract class Entry {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T> T forNullEntry(Class<T> cls) {
-		T o = (T)nullEntryMap.get(cls);
-		if (o == null && cls.isArray()) {
-			o = (T)Array.newInstance(cls.getComponentType(), 0);
-			nullEntryMap.put(cls, o);
+	public static Collection<? extends Entry> getAll(String typ) {
+		switch (typ) {
+		case "artist":
+			return ArtistEntry.getAll();
+		case "album":
+			return AlbumEntry.getAll();
+		case "song":
+			return SongEntry.getAll();
+		default:
+			throw new IllegalArgumentException();
 		}
-		return o;
+	}
+	
+	public static void clearAll() {
+		ArtistEntry.clearAll();
+		AlbumEntry.clearAll();
+		SongEntry.clearAll();
+		System.gc();
 	}
 	
 	public final Long id;

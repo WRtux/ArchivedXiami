@@ -61,6 +61,11 @@ public class SongEntry extends Entry {
 		return set;
 	}
 	
+	public static void clearAll() {
+		idEntryMap.clear();
+		sidEntryMap.clear();
+	}
+	
 	public static SongEntry matchEntry(Long id, String sid) {
 		SongEntry en = idEntryMap.get(id);
 		if (en != null) {
