@@ -3,21 +3,16 @@ package fxiami;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONWriter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
@@ -612,7 +607,7 @@ public final class Parser {
 			if (en.highlightOffset != null && en.highlightOffset != Entry.NULL_INTEGER) {
 				Long t = Helper.parseValidInteger(cont, "hotPartEndTime");
 				if (t != null && t != Entry.NULL_INTEGER)
-					t = t > en.highlightOffset ? t - en.highlightOffset : Entry.NULL_INTEGER;
+					t = (t > en.highlightOffset) ? t - en.highlightOffset : Entry.NULL_INTEGER;
 				if (en.highlightOffset == 0 && (t == null || t == Entry.NULL_INTEGER)) {
 					en.highlightOffset = null;
 				} else {
@@ -692,66 +687,13 @@ public final class Parser {
 					System.out.println("Rejected: " + ln);
 				}
 			}
-			System.out.println("Parse completed.");
+			System.out.println("Parse complete.");
 			return li;
 		} catch (Exception ex) {
 			System.err.println("Parse failed.");
 			throw ex;
 		} finally {
 			rdr.close();
-			System.gc();
-		}
-	}
-	
-	static void writeArray(Collection<? extends Entry> co, JSONWriter wtr) {
-		wtr.startArray();
-		for (Entry en : co) {
-			try {
-				wtr.writeValue(en.toJSON());
-			} catch (RuntimeException ex) {
-				System.err.println("Unexpected break:");
-				ex.printStackTrace();
-			}
-		}
-		wtr.endArray();
-	}
-	
-	public static void exportJSON(String typ, File src, File dest) throws IOException {
-		List<Entry> li = parseJSONM(typ, src);
-		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
-		wtr.config(SerializerFeature.WriteMapNullValue, true);
-		try {
-			System.out.println("Exporting...");
-			writeArray(li, wtr);
-			System.out.println("Export completed.");
-		} catch (Exception ex) {
-			System.err.println("Export failed.");
-			throw ex;
-		} finally {
-			wtr.close();
-			System.gc();
-		}
-	}
-	
-	public static void exportJSON(File dest) throws IOException {
-		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
-		wtr.config(SerializerFeature.WriteMapNullValue, true);
-		try {
-			System.out.println("Exporting...");
-			wtr.startObject();
-			wtr.writeKey("artists");
-			writeArray(ArtistEntry.getAll(), wtr);
-			wtr.writeKey("albums");
-			writeArray(AlbumEntry.getAll(), wtr);
-			wtr.writeKey("songs");
-			writeArray(SongEntry.getAll(), wtr);
-			wtr.endObject();
-			System.out.println("Export completed.");
-		} catch (Exception ex) {
-			System.err.println("Export failed.");
-			throw ex;
-		} finally {
-			wtr.close();
 			System.gc();
 		}
 	}
