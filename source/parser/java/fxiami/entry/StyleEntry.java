@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSONObject;
 
 public class StyleEntry {
 	
+	public static final String entryName = "style";
+	
 	protected static final Map<Long, StyleEntry> entryMap = new LinkedHashMap<>();
 	
 	public static StyleEntry getStyle(Long id, String n) {
@@ -43,6 +45,13 @@ public class StyleEntry {
 	}
 	public StyleEntry(Long gen, Long id) {
 		this(gen, id, null);
+	}
+	
+	public static StyleEntry parseJSON(JSONObject cont) {
+		Long gen = cont.getLong("genre"), id = cont.getLong("id");
+		String n = Helper.parseValidString(cont, "name");
+		StyleEntry en = getStyle(id, n);
+		return en != null ? en : new StyleEntry(gen, id, n);
 	}
 	
 	public JSONObject toJSON() {

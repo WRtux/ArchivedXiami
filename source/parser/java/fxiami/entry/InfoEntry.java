@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 
 public class InfoEntry {
 	
+	public static final String entryName = "info";
+	
 	public String title;
 	
 	public String content;
@@ -14,6 +16,11 @@ public class InfoEntry {
 	}
 	public InfoEntry() {
 		this(null, null);
+	}
+	
+	public static InfoEntry parseJSON(JSONObject cont) {
+		return new InfoEntry(
+			Helper.parseValidString(cont, "title"), Helper.parseValidString(cont, "content"));
 	}
 	
 	public JSONObject toJSON() {
