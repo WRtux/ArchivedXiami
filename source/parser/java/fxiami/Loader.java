@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 import com.alibaba.fastjson.JSONWriter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -19,6 +20,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
 import fxiami.entry.Entry;
+import fxiami.entry.EntryPort;
 import fxiami.entry.SongEntry;
 
 public final class Loader {
@@ -29,7 +31,16 @@ public final class Loader {
 		JSONReader rdr = new JSONReader(new BufferedReader(new InputStreamReader(in, "UTF-8")));
 		try {
 			System.out.println("Loading...");
-			//TODO
+			rdr.startArray();
+			while (rdr.hasNext()) {
+				try {
+					li.add((Entry)EntryPort.parseJSON(typ, (JSONObject)rdr.readObject()));
+				} catch (RuntimeException ex) {
+					System.err.println("Unexpected break:");
+					ex.printStackTrace();
+				}
+			}
+			rdr.endArray();
 		} catch (Exception ex) {
 			System.err.println("Load failed.");
 			throw ex;

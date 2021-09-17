@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 public class AlbumEntry extends Entry {
 	
+	public static final String entryName = "album";
+	
 	protected static final Map<Long, AlbumEntry> idEntryMap = new HashMap<>();
 	protected static final Map<String, AlbumEntry> sidEntryMap = new HashMap<>();
 	
@@ -144,6 +146,34 @@ public class AlbumEntry extends Entry {
 	}
 	public AlbumEntry(Long id, String sid) {
 		this(id, sid, false);
+	}
+	
+	public static AlbumEntry parseJSON(JSONObject cont) {
+		AlbumEntry en = new AlbumEntry(cont.getLong("id"), cont.getString("sid"));
+		en.update = Helper.parseValidInteger(cont, "update");
+		en.name = Helper.parseValidString(cont, "name");
+		en.subName = Helper.parseValidString(cont, "subName");
+		en.logoURL = Helper.parseValidString(cont, "logoURL");
+		if (cont.containsKey("artists"))
+			en.artists = EntryPort.parseJSONArray(ReferenceEntry.class, cont.getJSONArray("artists"));
+		if (cont.containsKey("companies"))
+			en.companies = EntryPort.parseJSONArray(ReferenceEntry.class, cont.getJSONArray("companies"));
+		en.category = EntryPort.parseJSON(CategoryEntry.class, cont.getJSONObject("category"));
+		en.discCount = Helper.parseValidInteger(cont, "discCount");
+		en.songCount = Helper.parseValidInteger(cont, "songCount");
+		en.publishTime = Helper.parseValidInteger(cont, "publishTime");
+		en.language = Helper.parseValidString(cont, "language");
+		if (cont.containsKey("styles"))
+			en.styles = EntryPort.parseJSONArray(StyleEntry.class, cont.getJSONArray("styles"));
+		en.info = Helper.parseValidString(cont, "info");
+		if (cont.containsKey("songs"))
+			en.songs = EntryPort.parseJSONArray(ReferenceEntry.class, cont.getJSONArray("songs"));
+		en.grade = Helper.parseValidInteger(cont, "grade");
+		en.gradeCount = Helper.parseValidInteger(cont, "gradeCount");
+		en.playCount = Helper.parseValidInteger(cont, "playCount");
+		en.likeCount = Helper.parseValidInteger(cont, "likeCount");
+		en.commentCount = Helper.parseValidInteger(cont, "commentCount");
+		return en;
 	}
 	
 	@Override

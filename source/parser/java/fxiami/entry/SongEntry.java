@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 public class SongEntry extends Entry {
 	
+	public static final String entryName = "song";
+	
 	protected static final Map<Long, SongEntry> idEntryMap = new HashMap<>();
 	protected static final Map<String, SongEntry> sidEntryMap = new HashMap<>();
 	
@@ -146,6 +148,40 @@ public class SongEntry extends Entry {
 	}
 	public SongEntry(Long id, String sid) {
 		this(id, sid, false);
+	}
+	
+	public static SongEntry parseJSON(JSONObject cont) {
+		SongEntry en = new SongEntry(cont.getLong("id"), cont.getString("sid"));
+		en.update = Helper.parseValidInteger(cont, "update");
+		en.name = Helper.parseValidString(cont, "name");
+		en.subName = Helper.parseValidString(cont, "subName");
+		en.translation = Helper.parseValidString(cont, "translation");
+		en.artist = EntryPort.parseJSON(ReferenceEntry.class, cont.getJSONObject("artist"));
+		if (cont.containsKey("singers"))
+			en.singers = EntryPort.parseJSONArray(ReferenceEntry.class, cont.getJSONArray("singers"));
+		if (cont.containsKey("staffs"))
+			en.staffs = EntryPort.parseJSONArray(StaffEntry.class, cont.getJSONArray("staffs"));
+		en.album = EntryPort.parseJSON(ReferenceEntry.class, cont.getJSONObject("album"));
+		en.disc = Helper.parseValidInteger(cont, "disc");
+		en.track = Helper.parseValidInteger(cont, "track");
+		en.length = Helper.parseValidInteger(cont, "length");
+		en.pace = Helper.parseValidInteger(cont, "pace");
+		en.highlightOffset = Helper.parseValidInteger(cont, "highlightOffset");
+		en.highlightLength = Helper.parseValidInteger(cont, "highlightLength");
+		if (cont.containsKey("styles"))
+			en.styles = EntryPort.parseJSONArray(StyleEntry.class, cont.getJSONArray("styles"));
+		if (cont.containsKey("tags")) {
+			String[][] tags = cont.getObject("tags", String[][].class);
+			en.tags = (tags != null) ? tags : forNullEntry(String[][].class);
+		}
+		if (cont.containsKey("infos"))
+			en.infos = EntryPort.parseJSONArray(InfoEntry.class, cont.getJSONArray("infos"));
+		if (cont.containsKey("lyrics"))
+			en.lyrics = EntryPort.parseJSONArray(LyricEntry.class, cont.getJSONArray("lyrics"));
+		en.playCount = Helper.parseValidInteger(cont, "playCount");
+		en.likeCount = Helper.parseValidInteger(cont, "likeCount");
+		en.commentCount = Helper.parseValidInteger(cont, "commentCount");
+		return en;
 	}
 	
 	@Override

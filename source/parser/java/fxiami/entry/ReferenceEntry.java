@@ -1,6 +1,10 @@
 package fxiami.entry;
 
+import com.alibaba.fastjson.JSONObject;
+
 public final class ReferenceEntry extends Entry {
+	
+	public static final String entryName = "reference";
 	
 	public ReferenceEntry(Long id, String sid) {
 		super(id, sid, true);
@@ -8,6 +12,11 @@ public final class ReferenceEntry extends Entry {
 	public ReferenceEntry(Long id, String sid, String n) {
 		this(id, sid);
 		this.name = n;
+	}
+	
+	public static ReferenceEntry parseJSON(JSONObject cont) {
+		return new ReferenceEntry(
+			cont.getLong("id"), cont.getString("sid"), Helper.parseValidString(cont, "name"));
 	}
 	
 	public ArtistEntry getArtistEntry() {

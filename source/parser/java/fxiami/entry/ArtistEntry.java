@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 public class ArtistEntry extends Entry {
 	
+	public static final String entryName = "artist";
+	
 	protected static final Map<Long, ArtistEntry> idEntryMap = new HashMap<>();
 	protected static final Map<String, ArtistEntry> sidEntryMap = new HashMap<>();
 	
@@ -135,6 +137,25 @@ public class ArtistEntry extends Entry {
 	}
 	public ArtistEntry(Long id, String sid) {
 		this(id, sid, false);
+	}
+	
+	public static ArtistEntry parseJSON(JSONObject cont) {
+		ArtistEntry en = new ArtistEntry(cont.getLong("id"), cont.getString("sid"));
+		en.update = Helper.parseValidInteger(cont, "update");
+		en.name = Helper.parseValidString(cont, "name");
+		en.subName = Helper.parseValidString(cont, "subName");
+		en.logoURL = Helper.parseValidString(cont, "logoURL");
+		en.gender = Helper.parseValidString(cont, "gender");
+		en.birthday = Helper.parseValidInteger(cont, "birthday");
+		en.area = Helper.parseValidString(cont, "area");
+		en.category = EntryPort.parseJSON(CategoryEntry.class, cont.getJSONObject("category"));
+		if (cont.containsKey("styles"))
+			en.styles = EntryPort.parseJSONArray(StyleEntry.class, cont.getJSONArray("styles"));
+		en.info = Helper.parseValidString(cont, "info");
+		en.playCount = Helper.parseValidInteger(cont, "playCount");
+		en.likeCount = Helper.parseValidInteger(cont, "likeCount");
+		en.commentCount = Helper.parseValidInteger(cont, "commentCount");
+		return en;
 	}
 	
 	@Override
