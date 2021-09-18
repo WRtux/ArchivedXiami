@@ -39,43 +39,6 @@ public final class Main {
 	
 	static void dispatchAction(String[] args, boolean ext) throws InterruptedException, IOException {
 		switch (args[0]) {
-		case "clear": {
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 1)
-				throw new InterruptedException("Illegal argument count.");
-			Entry.clearAll();
-			System.gc();
-			Runtime rt = Runtime.getRuntime();
-			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
-			System.out.println("Memory: " + mem + "KiB");
-			break;
-		}
-		case "category":
-			if (args.length != 1)
-				throw new InterruptedException("Illegal argument count.");
-			System.out.println("Listing categories...");
-			for (CategoryEntry en : CategoryEntry.getAll()) {
-				System.out.println(en.toJSON());
-			}
-			System.out.println("Listing styles...");
-			for (StyleEntry en : StyleEntry.getAll()) {
-				System.out.println(en.toJSON());
-			}
-			break;
-		case "free": {
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 1)
-				throw new InterruptedException("Illegal argument count.");
-			Runtime rt = Runtime.getRuntime();
-			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
-			System.out.print("Memory: " + mem + "KiB -> ");
-			System.gc();
-			mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
-			System.out.println(mem + "KiB");
-			break;
-		}
 		case "load":
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
@@ -90,13 +53,63 @@ public final class Main {
 				throw new InterruptedException("Illegal argument count.");
 			//TODO
 			break;
+		case "list":
+			if (args.length != 2)
+				throw new InterruptedException("Illegal argument count.");
+			switch (args[1]) {
+			case "category":
+				System.out.println("Listing categories...");
+				for (CategoryEntry en : CategoryEntry.getAll()) {
+					System.out.println(en.toJSON());
+				}
+				System.out.println("Listing styles...");
+				for (StyleEntry en : StyleEntry.getAll()) {
+					System.out.println(en.toJSON());
+				}
+				break;
+			default:
+				throw new InterruptedException("Unknown target.");
+			}
+			break;
 		case "export":
+			if (ext)
+				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 2)
+				throw new InterruptedException("Illegal argument count.");
+			Loader.exportJSON(args[1], new File(args[1] + ".json"));
+			break;
+		case "export-hybrid":
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
 			if (args.length != 1)
 				throw new InterruptedException("Illegal argument count.");
 			Loader.exportJSON(new File("hybrid.json"));
 			break;
+		case "clear": {
+			if (ext)
+				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 1)
+				throw new InterruptedException("Illegal argument count.");
+			Entry.clearAll();
+			System.gc();
+			Runtime rt = Runtime.getRuntime();
+			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
+			System.out.println("Memory: " + mem + "KiB");
+			break;
+		}
+		case "free": {
+			if (ext)
+				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 1)
+				throw new InterruptedException("Illegal argument count.");
+			Runtime rt = Runtime.getRuntime();
+			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
+			System.out.print("Memory: " + mem + "KiB -> ");
+			System.gc();
+			mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
+			System.out.println(mem + "KiB");
+			break;
+		}
 		case "extract": {
 			if (args.length != 3)
 				throw new InterruptedException("Illegal argument count.");
@@ -104,22 +117,20 @@ public final class Main {
 			Extractor.extractRaw(args[1], fs, new File(args[1] + ".jsonm"));
 			break;
 		}
-		case "parse": {
-			if (args.length != 3)
+		case "parse":
+			if (args.length == 3) {
+				List<Entry> li = Parser.parseJSONM(args[1], new File(args[2]));
+				if (ext)
+					Loader.exportJSON(li, new File(args[1] + ".json"));
+			} else if (args.length == 4) {
+				Parser.parseJSONM("artist", new File(args[1]));
+				Parser.parseJSONM("album", new File(args[2]));
+				Parser.parseJSONM("song", new File(args[3]));
+				if (ext)
+					Loader.exportJSON(new File("hybrid.json"));
+			} else {
 				throw new InterruptedException("Illegal argument count.");
-			List<Entry> li = Parser.parseJSONM(args[1], new File(args[2]));
-			if (ext)
-				Loader.exportJSON(li, new File(args[1] + ".json"));
-			break;
-		}
-		case "parse-hybrid":
-			if (args.length != 4)
-				throw new InterruptedException("Illegal argument count.");
-			Parser.parseJSONM("artist", new File(args[1]));
-			Parser.parseJSONM("album", new File(args[2]));
-			Parser.parseJSONM("song", new File(args[3]));
-			if (ext)
-				Loader.exportJSON(new File("hybrid.json"));
+			}
 			break;
 		case "index":
 			if (ext ? args.length != 4 : args.length != 1)
@@ -148,7 +159,8 @@ public final class Main {
 				dispatchAction(args, false);
 			} catch (InterruptedException ex) {
 				System.out.println(ex.getMessage());
-			} catch (IOException ex) {
+			} catch (Exception ex) {
+				System.err.println("Unexpected break:");
 				ex.printStackTrace();
 			}
 		}
