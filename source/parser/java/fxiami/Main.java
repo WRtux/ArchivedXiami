@@ -39,9 +39,18 @@ public final class Main {
 	
 	static void dispatchAction(String[] args, boolean ext) throws InterruptedException, IOException {
 		switch (args[0]) {
-		case "clear":
+		case "clear": {
+			if (ext)
+				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 1)
+				throw new InterruptedException("Illegal argument count.");
 			Entry.clearAll();
+			System.gc();
+			Runtime rt = Runtime.getRuntime();
+			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
+			System.out.println("Memory: " + mem + "KiB");
 			break;
+		}
 		case "category":
 			if (args.length != 1)
 				throw new InterruptedException("Illegal argument count.");
@@ -54,41 +63,55 @@ public final class Main {
 				System.out.println(en.toJSON());
 			}
 			break;
-		case "load":
-			if (args.length != 3)
-				throw new InterruptedException("Illegal argument count.");
+		case "free": {
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 1)
+				throw new InterruptedException("Illegal argument count.");
+			Runtime rt = Runtime.getRuntime();
+			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
+			System.out.print("Memory: " + mem + "KiB -> ");
+			System.gc();
+			mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
+			System.out.println(mem + "KiB");
+			break;
+		}
+		case "load":
+			if (ext)
+				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 3)
+				throw new InterruptedException("Illegal argument count.");
 			Loader.loadJSON(args[1], new File(args[2]));
 			break;
 		case "load-hybrid":
-			if (args.length != 2)
-				throw new InterruptedException("Illegal argument count.");
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 2)
+				throw new InterruptedException("Illegal argument count.");
 			//TODO
 			break;
 		case "export":
-			//TODO
-		case "extract":
-			if (args.length == 1) {
-				if (ext)
-					throw new InterruptedException("Not supported in command mode.");
-				Loader.exportJSON(new File("hybrid.json"));
-				break;
-			}
+			if (ext)
+				throw new InterruptedException("Not supported in command mode.");
+			if (args.length != 1)
+				throw new InterruptedException("Illegal argument count.");
+			Loader.exportJSON(new File("hybrid.json"));
+			break;
+		case "extract": {
 			if (args.length != 3)
 				throw new InterruptedException("Illegal argument count.");
 			File[] fs = new File(args[2]).listFiles();
-			Exporter.exportJSONM(args[1], fs, new File(args[1] + ".jsonm"));
+			Extractor.extractRaw(args[1], fs, new File(args[1] + ".jsonm"));
 			break;
-		case "parse":
+		}
+		case "parse": {
 			if (args.length != 3)
 				throw new InterruptedException("Illegal argument count.");
 			List<Entry> li = Parser.parseJSONM(args[1], new File(args[2]));
 			if (ext)
 				Loader.exportJSON(li, new File(args[1] + ".json"));
 			break;
+		}
 		case "parse-hybrid":
 			if (args.length != 4)
 				throw new InterruptedException("Illegal argument count.");

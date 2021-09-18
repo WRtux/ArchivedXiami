@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.IOUtils;
 
-public final class Exporter {
+public final class Extractor {
 	
 	public static String convertRaw(String typ, File f) throws IOException {
 		InputStream in = new FileInputStream(f);
@@ -43,12 +43,12 @@ public final class Exporter {
 		}
 	}
 	
-	public static void exportJSONM(String typ, File[] src, File dest) throws IOException {
+	public static void extractRaw(String typ, File[] src, File dest) throws IOException {
 		Writer wtr = new OutputStreamWriter(new FileOutputStream(dest), "UTF-8");
 		try {
-			System.out.println("Exporting " + src.length + " files...");
+			System.out.println("Extracting " + src.length + " files...");
 			for (File f : src) {
-				System.out.println("Process " + f.getName());
+				System.out.println("Processing " + f.getName() + "...");
 				String str = convertRaw(typ, f);
 				if (str != null) {
 					wtr.write(str);
@@ -57,9 +57,9 @@ public final class Exporter {
 					System.out.println("No data found.");
 				}
 			}
-			System.out.println("Export completed.");
+			System.out.println("Extract complete.");
 		} catch (Exception ex) {
-			System.err.println("Export failed.");
+			System.err.println("Extract failed.");
 			throw ex;
 		} finally {
 			wtr.close();
@@ -67,7 +67,7 @@ public final class Exporter {
 	}
 	
 	@Deprecated
-	private Exporter() {
+	private Extractor() {
 		throw new IllegalStateException();
 	}
 	

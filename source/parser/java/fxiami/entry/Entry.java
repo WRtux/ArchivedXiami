@@ -66,7 +66,6 @@ public abstract class Entry {
 		ArtistEntry.clearAll();
 		AlbumEntry.clearAll();
 		SongEntry.clearAll();
-		System.gc();
 	}
 	
 	public final Long id;
