@@ -26,9 +26,9 @@ import fxiami.entry.SongEntry;
 import fxiami.entry.StaffEntry;
 import fxiami.entry.StyleEntry;
 
-public final class Parser {
+public final class Converter {
 	
-	public static final class ArtistParser {
+	public static final class ArtistConverter {
 		
 		static ArtistEntry processEntry(JSONObject cont, boolean ext) {
 			Long id = cont.getLong("artistId");
@@ -91,7 +91,7 @@ public final class Parser {
 				int cnt = 0;
 				for (int i = 0; i < ens.length; i++) {
 					try {
-						ens[i] = parseEntry(typ, arr.getJSONObject(i), false);
+						ens[i] = convertEntry(typ, arr.getJSONObject(i), false);
 						if (ens[i] != null)
 							cnt++;
 					} catch (RuntimeException ex) {
@@ -136,7 +136,7 @@ public final class Parser {
 			}
 		}
 		
-		public static ArtistEntry parseArtistEntry(JSONObject o, boolean ext) {
+		public static ArtistEntry convertArtistEntry(JSONObject o, boolean ext) {
 			JSONObject cont = ext ? o.getJSONObject("artistDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
@@ -155,13 +155,13 @@ public final class Parser {
 			en.area = Helper.parseValidString(cont, "area");
 			if (en.area != null && en.area.isEmpty())
 				en.area = null;
-			en.category = AlbumParser.processCategory(cont);
+			en.category = AlbumConverter.processCategory(cont);
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "countLikes");
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
-			en.styles = SongParser.processStyles(cont);
+			en.styles = SongConverter.processStyles(cont);
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
 				en.info = Entry.NULL_STRING;
@@ -178,13 +178,13 @@ public final class Parser {
 		}
 		
 		@Deprecated
-		private ArtistParser() {
+		private ArtistConverter() {
 			throw new IllegalStateException();
 		}
 		
 	}
 	
-	public static final class AlbumParser {
+	public static final class AlbumConverter {
 		
 		static AlbumEntry processEntry(JSONObject cont, boolean ext) {
 			Long id = cont.getLong("albumId");
@@ -267,7 +267,7 @@ public final class Parser {
 					try {
 						JSONObject o = arr.getJSONObject(i);
 						ens[i] = Helper.parseValidEntry(o, "songId", "songStringId", "songName");
-						if (parseEntry("song", o, false) != null)
+						if (convertEntry("song", o, false) != null)
 							cnt++;
 					} catch (RuntimeException ex) {
 						System.out.println("Not a valid song: " + String.valueOf(arr.get(i)));
@@ -290,7 +290,7 @@ public final class Parser {
 				int cnt = 0;
 				for (int i = 0; i < ens.length; i++) {
 					try {
-						ens[i] = (AlbumEntry)parseEntry("album", arr.getJSONObject(i), false);
+						ens[i] = (AlbumEntry)convertEntry("album", arr.getJSONObject(i), false);
 						if (ens[i] != null)
 							cnt++;
 					} catch (RuntimeException ex) {
@@ -305,7 +305,7 @@ public final class Parser {
 			}
 		}
 		
-		public static AlbumEntry parseAlbumEntry(JSONObject o, boolean ext) {
+		public static AlbumEntry convertAlbumEntry(JSONObject o, boolean ext) {
 			JSONObject cont = ext ? o.getJSONObject("albumDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
@@ -346,7 +346,7 @@ public final class Parser {
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
-			en.styles = SongParser.processStyles(cont);
+			en.styles = SongConverter.processStyles(cont);
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
 				en.info = Entry.NULL_STRING;
@@ -359,13 +359,13 @@ public final class Parser {
 		}
 		
 		@Deprecated
-		private AlbumParser() {
+		private AlbumConverter() {
 			throw new IllegalStateException();
 		}
 		
 	}
 	
-	public static final class SongParser {
+	public static final class SongConverter {
 		
 		static SongEntry processEntry(JSONObject cont, boolean ext) {
 			Long id = cont.getLong("songId");
@@ -531,7 +531,7 @@ public final class Parser {
 				int cnt = 0;
 				for (int i = 0; i < ens.length; i++) {
 					try {
-						ens[i] = (SongEntry)parseEntry("song", arr.getJSONObject(i), false);
+						ens[i] = (SongEntry)convertEntry("song", arr.getJSONObject(i), false);
 						if (ens[i] != null)
 							cnt++;
 					} catch (RuntimeException ex) {
@@ -571,7 +571,7 @@ public final class Parser {
 			}
 		}
 		
-		public static SongEntry parseSongEntry(JSONObject o, boolean ext) {
+		public static SongEntry convertSongEntry(JSONObject o, boolean ext) {
 			JSONObject cont = ext ? o.getJSONObject("songDetail") : o;
 			if (cont == null || cont.isEmpty())
 				return null;
@@ -624,7 +624,7 @@ public final class Parser {
 				en.singers = processSingers(cont);
 				en.staffs = processStaffs(cont);
 				try {
-					if (parseEntry("album", cont.getJSONObject("album"), false) != null)
+					if (convertEntry("album", cont.getJSONObject("album"), false) != null)
 						System.out.println("Album extension added.");
 				} catch (RuntimeException ex) {
 					System.out.println("Not a valid album: " + String.valueOf(cont.get("album")));
@@ -642,40 +642,40 @@ public final class Parser {
 		}
 		
 		@Deprecated
-		private SongParser() {
+		private SongConverter() {
 			throw new IllegalStateException();
 		}
 		
 	}
 	
-	public static Entry parseEntry(String typ, JSONObject o, boolean ext) {
+	public static Entry convertEntry(String typ, JSONObject o, boolean ext) {
 		switch (typ) {
 		case "artist":
-			return ArtistParser.parseArtistEntry(o, ext);
+			return ArtistConverter.convertArtistEntry(o, ext);
 		case "album":
-			return AlbumParser.parseAlbumEntry(o, ext);
+			return AlbumConverter.convertAlbumEntry(o, ext);
 		case "song":
-			return SongParser.parseSongEntry(o, ext);
+			return SongConverter.convertSongEntry(o, ext);
 		default:
 			throw new IllegalArgumentException();
 		}
 	}
-	public static Entry parseEntry(String typ, String dat) {
-		return parseEntry(typ, JSON.parseObject(dat), true);
+	public static Entry convertEntry(String typ, String dat) {
+		return convertEntry(typ, JSON.parseObject(dat), true);
 	}
 	
-	public static List<Entry> parseJSONM(String typ, File f) throws IOException {
+	public static List<Entry> convertJSONM(String typ, File f) throws IOException {
 		InputStream in = new FileInputStream(f);
 		BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 		List<Entry> li = new ArrayList<>();
 		try {
 			Entry.getEntryClass(typ);
-			System.out.println("Parsing " + f.getName() + "...");
+			System.out.println("Converting " + f.getName() + "...");
 			String ln = null;
 			while ((ln = rdr.readLine()) != null) {
 				Entry en = null;
 				try {
-					en = parseEntry(typ, ln);
+					en = convertEntry(typ, ln);
 				} catch (RuntimeException ex) {
 					System.err.println("Unexpected break:");
 					ex.printStackTrace();
@@ -687,10 +687,10 @@ public final class Parser {
 					System.out.println("Rejected: " + ln);
 				}
 			}
-			System.out.println("Parse complete.");
+			System.out.println("Convert complete.");
 			return li;
 		} catch (Exception ex) {
-			System.err.println("Parse failed.");
+			System.err.println("Convert failed.");
 			throw ex;
 		} finally {
 			rdr.close();
@@ -699,7 +699,7 @@ public final class Parser {
 	}
 	
 	@Deprecated
-	private Parser() {
+	private Converter() {
 		throw new IllegalStateException();
 	}
 	

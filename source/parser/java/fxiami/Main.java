@@ -42,9 +42,15 @@ public final class Main {
 		case "load":
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 3)
+			if (args.length == 3) {
+				Loader.loadJSON(args[1], new File(args[2]));
+			} else if (args.length == 4) {
+				Loader.loadJSON("artist", new File(args[1]));
+				Loader.loadJSON("album", new File(args[2]));
+				Loader.loadJSON("song", new File(args[3]));
+			} else {
 				throw new InterruptedException("Illegal argument count.");
-			Loader.loadJSON(args[1], new File(args[2]));
+			}
 			break;
 		case "load-hybrid":
 			if (ext)
@@ -117,15 +123,15 @@ public final class Main {
 			Extractor.extractRaw(args[1], fs, new File(args[1] + ".jsonm"));
 			break;
 		}
-		case "parse":
+		case "convert":
 			if (args.length == 3) {
-				List<Entry> li = Parser.parseJSONM(args[1], new File(args[2]));
+				List<Entry> li = Converter.convertJSONM(args[1], new File(args[2]));
 				if (ext)
 					Loader.exportJSON(li, new File(args[1] + ".json"));
 			} else if (args.length == 4) {
-				Parser.parseJSONM("artist", new File(args[1]));
-				Parser.parseJSONM("album", new File(args[2]));
-				Parser.parseJSONM("song", new File(args[3]));
+				Converter.convertJSONM("artist", new File(args[1]));
+				Converter.convertJSONM("album", new File(args[2]));
+				Converter.convertJSONM("song", new File(args[3]));
 				if (ext)
 					Loader.exportJSON(new File("hybrid.json"));
 			} else {
@@ -136,9 +142,9 @@ public final class Main {
 			if (ext ? args.length != 4 : args.length != 1)
 				throw new InterruptedException("Illegal argument count.");
 			if (ext) {
-				Parser.parseJSONM("artist", new File(args[1]));
-				Parser.parseJSONM("album", new File(args[2]));
-				Parser.parseJSONM("song", new File(args[3]));
+				Converter.convertJSONM("artist", new File(args[1]));
+				Converter.convertJSONM("album", new File(args[2]));
+				Converter.convertJSONM("song", new File(args[3]));
 			}
 			Indexer.exportIndex(new File("hybrid.ijsom"));
 			break;
