@@ -2,7 +2,7 @@ package fxiami.entry;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class LyricEntry {
+public class LyricEntry implements EntryPort.Entry {
 	
 	public static final String entryName = "lyric";
 	
@@ -17,7 +17,7 @@ public class LyricEntry {
 	public String contentURL;
 	
 	public LyricEntry(Long id, Long typ, String url) {
-		this.id = (id != Entry.NULL_INTEGER ? id : null);
+		this.id = (id != EntryPort.NULL_INTEGER ? id : null);
 		this.type = typ;
 		this.contentURL = url;
 	}

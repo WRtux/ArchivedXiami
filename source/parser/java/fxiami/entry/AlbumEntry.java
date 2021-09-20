@@ -10,7 +10,7 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-public class AlbumEntry extends Entry {
+public class AlbumEntry extends MappedEntry {
 	
 	public static final String entryName = "album";
 	
@@ -183,7 +183,7 @@ public class AlbumEntry extends Entry {
 		Helper.putValidString(o, "logoURL", this.logoURL);
 		if (this.artists != null) {
 			JSONArray arr = null;
-			if (this.artists != Entry.forNullEntry(ReferenceEntry[].class)) {
+			if (this.artists != EntryPort.forNullEntry(ReferenceEntry[].class)) {
 				arr = new JSONArray(this.artists.length);
 				for (ReferenceEntry en : this.artists) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -193,7 +193,7 @@ public class AlbumEntry extends Entry {
 		}
 		if (this.companies != null) {
 			JSONArray arr = null;
-			if (this.artists != Entry.forNullEntry(ReferenceEntry[].class)) {
+			if (this.artists != EntryPort.forNullEntry(ReferenceEntry[].class)) {
 				arr = new JSONArray(this.companies.length);
 				for (ReferenceEntry en : this.companies) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -208,7 +208,7 @@ public class AlbumEntry extends Entry {
 		Helper.putValidString(o, "language", this.language);
 		if (this.styles != null) {
 			JSONArray arr = null;
-			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
+			if (this.styles != EntryPort.forNullEntry(StyleEntry[].class)) {
 				arr = new JSONArray(this.styles.length);
 				for (StyleEntry en : this.styles) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -219,7 +219,7 @@ public class AlbumEntry extends Entry {
 		Helper.putValidString(o, "info", this.info);
 		if (this.songs != null) {
 			JSONArray arr = null;
-			if (this.songs != Entry.forNullEntry(ReferenceEntry[].class)) {
+			if (this.songs != EntryPort.forNullEntry(ReferenceEntry[].class)) {
 				arr = new JSONArray(this.songs.length);
 				for (ReferenceEntry en : this.songs) {
 					arr.add(en != null ? en.toJSON() : null);

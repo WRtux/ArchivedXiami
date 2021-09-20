@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 public final class EntryPort {
 	
+	public static interface Entry {}
+	
 	static final Map<Class<?>, Object> nullEntryMap = new HashMap<>();
 	
 	public static final Long NULL_INTEGER = new Long(0x80000000_00000000L);
@@ -20,11 +22,15 @@ public final class EntryPort {
 	public static final String NULL_STRING = new String(new char[] {0});
 	public static final Object[] NULL_OBJECT_ARRAY = new Object[0];
 	
-	static final Map<String, Class<?>> entryClassMap = new HashMap<>();
+	static final Map<String, Class<? extends Entry>> entryClassMap = new HashMap<>();
 	
-	private static final Map<Class<?>, Method> parseMehtodMap = new HashMap<>();
-	private static final Map<Class<?>, Method> toJSONMethodMap = new HashMap<>();
+	private static final Map<Class<? extends Entry>, Method> parseMehtodMap = new HashMap<>();
+	private static final Map<Class<? extends Entry>, Method> toJSONMethodMap = new HashMap<>();
 	
+	@SuppressWarnings("unchecked")
+	private static final Class<? extends Entry>[] defaultEntryClasses = new Class[] {
+		ArtistEntry.class, AlbumEntry.class, SongEntry.class, ReferenceEntry.class,
+		CategoryEntry.class, StyleEntry.class, InfoEntry.class, StaffEntry.class, LyricEntry.class};
 	static {
 		nullEntryMap.put(Number.class, NULL_INTEGER);
 		nullEntryMap.put(Long.class, NULL_INTEGER);
@@ -32,15 +38,9 @@ public final class EntryPort {
 		nullEntryMap.put(Boolean.class, NULL_BOOLEAN);
 		nullEntryMap.put(String.class, NULL_STRING);
 		nullEntryMap.put(Object[].class, NULL_OBJECT_ARRAY);
-		registerEntryClass(ArtistEntry.class);
-		registerEntryClass(AlbumEntry.class);
-		registerEntryClass(SongEntry.class);
-		registerEntryClass(ReferenceEntry.class);
-		registerEntryClass(CategoryEntry.class);
-		registerEntryClass(StyleEntry.class);
-		registerEntryClass(InfoEntry.class);
-		registerEntryClass(StaffEntry.class);
-		registerEntryClass(LyricEntry.class);
+		for (Class<? extends Entry> cls : defaultEntryClasses) {
+			registerEntryClass(cls);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -53,7 +53,7 @@ public final class EntryPort {
 		return o;
 	}
 	
-	public static boolean registerEntryClass(String n, Class<?> cls) {
+	public static boolean registerEntryClass(String n, Class<? extends Entry> cls) {
 		if (entryClassMap.containsKey(cls))
 			return false;
 		Method smth, meth;
@@ -73,16 +73,16 @@ public final class EntryPort {
 		toJSONMethodMap.put(cls, meth);
 		return true;
 	}
-	public static boolean registerEntryClass(Class<?> cls) {
+	public static boolean registerEntryClass(Class<? extends Entry> cls) {
 		return registerEntryClass(null, cls);
 	}
 	
-	public static Class<?> getEntryClass(String n) {
+	public static Class<? extends Entry> getEntryClass(String n) {
 		return entryClassMap.get(n);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T parseJSON(Class<T> cls, JSONObject cont) {
+	public static <T extends Entry> T parseJSON(Class<T> cls, JSONObject cont) {
 		if (cont == null)
 			return null;
 		try {
@@ -98,7 +98,7 @@ public final class EntryPort {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T[] parseJSONArray(Class<T> cls, JSONArray arr) {
+	public static <T extends Entry> T[] parseJSONArray(Class<T> cls, JSONArray arr) {
 		T[] ens = null;
 		if (arr != null) {
 			ens = (T[])Array.newInstance(cls, arr.size());
@@ -112,7 +112,7 @@ public final class EntryPort {
 		return parseJSONArray(entryClassMap.get(typ), arr);
 	}
 	
-	public static JSONObject toJSON(Object en) {
+	public static JSONObject toJSON(Entry en) {
 		if (en == null)
 			return null;
 		try {
@@ -124,11 +124,11 @@ public final class EntryPort {
 		}
 	}
 	
-	public static JSONArray toJSONArray(Object[] ens) {
+	public static JSONArray toJSONArray(Entry[] ens) {
 		if (ens == null || Helper.isNullArray(ens))
 			return null;
 		JSONArray arr = new JSONArray(ens.length);
-		for (Object en : ens) {
+		for (Entry en : ens) {
 			arr.add(toJSON(en));
 		}
 		return arr;

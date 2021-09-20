@@ -10,7 +10,7 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-public class ArtistEntry extends Entry {
+public class ArtistEntry extends MappedEntry {
 	
 	public static final String entryName = "artist";
 	
@@ -169,7 +169,7 @@ public class ArtistEntry extends Entry {
 		o.put("category", this.category != null ? this.category.toJSON() : null);
 		if (this.styles != null) {
 			JSONArray arr = null;
-			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
+			if (this.styles != EntryPort.forNullEntry(StyleEntry[].class)) {
 				arr = new JSONArray(this.styles.length);
 				for (StyleEntry en : this.styles) {
 					arr.add(en != null ? en.toJSON() : null);

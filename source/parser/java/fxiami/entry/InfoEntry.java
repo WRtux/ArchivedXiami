@@ -2,7 +2,7 @@ package fxiami.entry;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class InfoEntry {
+public class InfoEntry implements EntryPort.Entry {
 	
 	public static final String entryName = "info";
 	

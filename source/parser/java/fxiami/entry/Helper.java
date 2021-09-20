@@ -6,15 +6,15 @@ import com.alibaba.fastjson.JSONObject;
 public final class Helper {
 	
 	public static boolean isNullFloatValue(double num) {
-		return Double.doubleToRawLongBits(num) == Double.doubleToRawLongBits(Entry.NULL_FLOAT);
+		return Double.doubleToRawLongBits(num) == Double.doubleToRawLongBits(EntryPort.NULL_FLOAT);
 	}
 	
 	public static boolean isNullArray(Object[] arr) {
-		return arr != null && arr == Entry.forNullEntry(arr.getClass());
+		return arr != null && arr == EntryPort.forNullEntry(arr.getClass());
 	}
 	
 	public static boolean isEmptyArray(Object[] arr) {
-		return arr != null && arr != Entry.forNullEntry(arr.getClass()) && arr.length == 0;
+		return arr != null && arr != EntryPort.forNullEntry(arr.getClass()) && arr.length == 0;
 	}
 	
 	public static Long parseValidInteger(JSONObject o, String k) {
@@ -26,7 +26,7 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not an integer: " + String.valueOf(o.get(k)));
 		}
-		return num != null ? num : Entry.NULL_INTEGER;
+		return num != null ? num : EntryPort.NULL_INTEGER;
 	}
 	
 	public static Double parseValidFloat(JSONObject o, String k) {
@@ -38,7 +38,7 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not a float: " + String.valueOf(o.get(k)));
 		}
-		return num != null ? num : Entry.NULL_FLOAT;
+		return num != null ? num : EntryPort.NULL_FLOAT;
 	}
 	
 	public static Boolean parseValidBoolean(JSONObject o, String k) {
@@ -50,7 +50,7 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not a boolean: " + String.valueOf(o.get(k)));
 		}
-		return b != null ? b : Entry.NULL_BOOLEAN;
+		return b != null ? b : EntryPort.NULL_BOOLEAN;
 	}
 	
 	public static String parseValidString(JSONObject o, String k) {
@@ -62,7 +62,7 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not a string: " + String.valueOf(o.get(k)));
 		}
-		return str != null ? str : Entry.NULL_STRING;
+		return str != null ? str : EntryPort.NULL_STRING;
 	}
 	
 	public static Object[] parseValidArray(JSONObject o, String k) {
@@ -76,7 +76,7 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not a valid array: " + String.valueOf(o.get(k)));
 		}
-		return arr != null ? arr : Entry.NULL_OBJECT_ARRAY;
+		return arr != null ? arr : EntryPort.NULL_OBJECT_ARRAY;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -91,7 +91,7 @@ public final class Helper {
 		} catch (RuntimeException ex) {
 			System.out.println("Not a valid array: " + String.valueOf(o.get(k)));
 		}
-		return arr != null ? arr : (T[])Entry.forNullEntry(dest.getClass());
+		return arr != null ? arr : (T[])EntryPort.forNullEntry(dest.getClass());
 	}
 	
 	public static ReferenceEntry parseValidEntry(JSONObject o, String idk, String sidk) {
@@ -114,7 +114,7 @@ public final class Helper {
 			Long id = o.getLong(idk);
 			String sid = o.getString(sidk);
 			String n = parseValidString(o, nk);
-			if (id != null || sid != null || (n != null && n != Entry.NULL_STRING))
+			if (id != null || sid != null || (n != null && n != EntryPort.NULL_STRING))
 				ren = new ReferenceEntry(id, sid, n);
 		} catch (RuntimeException ex) {
 			System.out.printf("Not a valid entry: %s, %s, %s%n",
@@ -126,50 +126,50 @@ public final class Helper {
 	public static boolean putValidInteger(JSONObject dest, String k, Number num) {
 		if (num == null)
 			return false;
-		dest.put(k, num != Entry.NULL_INTEGER ? num.longValue() : null);
+		dest.put(k, num != EntryPort.NULL_INTEGER ? num.longValue() : null);
 		return true;
 	}
 	
 	public static boolean putValidFloat(JSONObject dest, String k, Number num) {
 		if (num == null)
 			return false;
-		dest.put(k, num != Entry.NULL_FLOAT ? num.doubleValue() : null);
+		dest.put(k, num != EntryPort.NULL_FLOAT ? num.doubleValue() : null);
 		return true;
 	}
 	
 	public static boolean putValidBoolean(JSONObject dest, String k, Boolean b) {
 		if (b == null)
 			return false;
-		dest.put(k, b != Entry.NULL_BOOLEAN ? b : null);
+		dest.put(k, b != EntryPort.NULL_BOOLEAN ? b : null);
 		return true;
 	}
 	
 	public static boolean putValidString(JSONObject dest, String k, String str) {
 		if (str == null)
 			return false;
-		dest.put(k, str != Entry.NULL_STRING ? str : null);
+		dest.put(k, str != EntryPort.NULL_STRING ? str : null);
 		return true;
 	}
 	
 	public static boolean putValidArray(JSONObject dest, String k, Object[] arr) {
 		if (arr == null)
 			return false;
-		dest.put(k, arr != Entry.forNullEntry(arr.getClass()) ? arr : null);
+		dest.put(k, arr != EntryPort.forNullEntry(arr.getClass()) ? arr : null);
 		return true;
 	}
 	
-	public static boolean putValidEntry(JSONObject dest, String idk, String sidk, Entry en) {
+	public static boolean putValidEntry(JSONObject dest, String idk, String sidk, MappedEntry en) {
 		if (en == null)
 			return false;
 		dest.put(idk, en.id);
 		dest.put(sidk, en.sid);
 		return true;
 	}
-	public static boolean putValidEntry(JSONObject dest, Entry en) {
+	public static boolean putValidEntry(JSONObject dest, MappedEntry en) {
 		return putValidEntry(dest, "id", "sid", en);
 	}
 	
-	public static JSONObject getValidEntry(String idk, String sidk, Entry en) {
+	public static JSONObject getValidEntry(String idk, String sidk, MappedEntry en) {
 		if (en == null)
 			return null;
 		JSONObject o = new JSONObject(true);
@@ -177,7 +177,7 @@ public final class Helper {
 		o.put(sidk, en.sid);
 		return o;
 	}
-	public static JSONObject getValidEntry(Entry en) {
+	public static JSONObject getValidEntry(MappedEntry en) {
 		return getValidEntry("id", "sid", en);
 	}
 	

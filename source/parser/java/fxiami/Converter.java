@@ -17,7 +17,8 @@ import com.alibaba.fastjson.JSONObject;
 import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
 import fxiami.entry.CategoryEntry;
-import fxiami.entry.Entry;
+import fxiami.entry.EntryPort;
+import fxiami.entry.MappedEntry;
 import fxiami.entry.Helper;
 import fxiami.entry.InfoEntry;
 import fxiami.entry.LyricEntry;
@@ -51,7 +52,7 @@ public final class Converter {
 				String str = cont.getString("gender");
 				switch (str) {
 				case "":
-					str = Entry.NULL_STRING;
+					str = EntryPort.NULL_STRING;
 					break;
 				case "M":
 				case "F":
@@ -64,11 +65,11 @@ public final class Converter {
 				return str;
 			} catch (RuntimeException ex) {
 				System.out.println("Not a valid gender: " + String.valueOf(cont.get("gender")));
-				return Entry.NULL_STRING;
+				return EntryPort.NULL_STRING;
 			}
 		}
 		
-		static Entry[] processSimilars(String typ, JSONObject cont) {
+		static MappedEntry[] processSimilars(String typ, JSONObject cont) {
 			String n;
 			switch (typ) {
 			case "artist":
@@ -87,7 +88,7 @@ public final class Converter {
 				return null;
 			try {
 				JSONArray arr = cont.getJSONArray(n);
-				Entry[] ens = (Entry[])Array.newInstance(Entry.getEntryClass(typ), arr.size());
+				MappedEntry[] ens = (MappedEntry[])Array.newInstance(MappedEntry.getEntryClass(typ), arr.size());
 				int cnt = 0;
 				for (int i = 0; i < ens.length; i++) {
 					try {
@@ -102,7 +103,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid entries: " + String.valueOf(cont.get(n)));
-				return Entry.forNullEntry(ArtistEntry[].class);
+				return EntryPort.forNullEntry(ArtistEntry[].class);
 			}
 		}
 		
@@ -148,7 +149,7 @@ public final class Converter {
 				System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "alias");
 			if (en.subName != null && en.subName.isEmpty())
-				en.subName = Entry.NULL_STRING;
+				en.subName = EntryPort.NULL_STRING;
 			en.logoURL = Helper.parseValidString(cont, "artistLogo");
 			en.gender = processGender(cont);
 			en.birthday = Helper.parseValidInteger(cont, "birthday");
@@ -164,7 +165,7 @@ public final class Converter {
 			en.styles = SongConverter.processStyles(cont);
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
-				en.info = Entry.NULL_STRING;
+				en.info = EntryPort.NULL_STRING;
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			JSONArray arr = o.getJSONArray("artistExt");
 			if (arr != null && !arr.isEmpty()) {
@@ -217,7 +218,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid artists: " + String.valueOf(cont.get("artists")));
-				return Entry.forNullEntry(ReferenceEntry[].class);
+				return EntryPort.forNullEntry(ReferenceEntry[].class);
 			}
 		}
 		
@@ -237,7 +238,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid companies: " + String.valueOf(cont.get("companies")));
-				return Entry.forNullEntry(ReferenceEntry[].class);
+				return EntryPort.forNullEntry(ReferenceEntry[].class);
 			}
 		}
 		
@@ -245,7 +246,7 @@ public final class Converter {
 			try {
 				Long id = cont.getLong("categoryId");
 				String n = Helper.parseValidString(cont, "albumCategory");
-				CategoryEntry en = CategoryEntry.getCategory(id, n != Entry.NULL_STRING ? n : null);
+				CategoryEntry en = CategoryEntry.getCategory(id, n != EntryPort.NULL_STRING ? n : null);
 				if (id != null && id != 0 && en == null)
 					System.out.printf("No matching category for %d, %s.%n", id, n);
 				return en;
@@ -277,7 +278,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid songs: " + String.valueOf(cont.get("songs")));
-				return Entry.forNullEntry(ReferenceEntry[].class);
+				return EntryPort.forNullEntry(ReferenceEntry[].class);
 			}
 		}
 		
@@ -301,7 +302,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid albums: " + String.valueOf(cont.get("albums")));
-				return Entry.forNullEntry(AlbumEntry[].class);
+				return EntryPort.forNullEntry(AlbumEntry[].class);
 			}
 		}
 		
@@ -317,7 +318,7 @@ public final class Converter {
 				System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "subName");
 			if (en.subName != null && en.subName.isEmpty())
-				en.subName = Entry.NULL_STRING;
+				en.subName = EntryPort.NULL_STRING;
 			en.logoURL = Helper.parseValidString(cont, "albumLogo");
 			en.artists = processArtists(cont);
 			en.companies = processCompanies(cont);
@@ -333,14 +334,14 @@ public final class Converter {
 			if (en.language != null && en.language.isEmpty())
 				en.language = null;
 			Double d = Helper.parseValidFloat(cont, "grade");
-			if (d != null && d != Entry.NULL_FLOAT) {
+			if (d != null && d != EntryPort.NULL_FLOAT) {
 				en.grade = Math.round(d.doubleValue() * 10);
-			} else if (d == Entry.NULL_FLOAT) {
-				en.grade = Entry.NULL_INTEGER;
+			} else if (d == EntryPort.NULL_FLOAT) {
+				en.grade = EntryPort.NULL_INTEGER;
 			}
 			en.gradeCount = Helper.parseValidInteger(cont, "gradeCount");
 			if (en.grade != null && en.grade == 0 && (en.gradeCount == null || en.gradeCount < 10))
-				en.grade = Entry.NULL_INTEGER;
+				en.grade = EntryPort.NULL_INTEGER;
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
 			en.likeCount = Helper.parseValidInteger(cont, "collects");
 			if (!ext)
@@ -349,7 +350,7 @@ public final class Converter {
 			en.styles = SongConverter.processStyles(cont);
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
-				en.info = Entry.NULL_STRING;
+				en.info = EntryPort.NULL_STRING;
 			en.songs = processSongs(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
 			cont = o.getJSONObject("artistAlbums");
@@ -408,7 +409,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid singers: " + String.valueOf(cont.get("singerVOs")));
-				return Entry.forNullEntry(ReferenceEntry[].class);
+				return EntryPort.forNullEntry(ReferenceEntry[].class);
 			}
 		}
 		
@@ -424,7 +425,7 @@ public final class Converter {
 				}
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid staff: " + String.valueOf(cont.get("staffs")));
-				en.artists = Entry.forNullEntry(ReferenceEntry[].class);
+				en.artists = EntryPort.forNullEntry(ReferenceEntry[].class);
 			}
 			return en;
 		}
@@ -445,7 +446,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid staffs: " + String.valueOf(cont.get("behindStaffs")));
-				return Entry.forNullEntry(StaffEntry[].class);
+				return EntryPort.forNullEntry(StaffEntry[].class);
 			}
 		}
 		
@@ -460,7 +461,7 @@ public final class Converter {
 						JSONObject o = arr.getJSONObject(i);
 						Long id = o.getLong("styleId");
 						String n = Helper.parseValidString(o, "styleName");
-						ens[i] = StyleEntry.getStyle(id, n != Entry.NULL_STRING ? n : null);
+						ens[i] = StyleEntry.getStyle(id, n != EntryPort.NULL_STRING ? n : null);
 						if (id != null && id != 0 && ens[i] == null)
 							System.out.printf("No matching style for %d, %s.%n", id, n);
 					} catch (RuntimeException ex) {
@@ -470,7 +471,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid styles: " + String.valueOf(cont.get("styles")));
-				return Entry.forNullEntry(StyleEntry[].class);
+				return EntryPort.forNullEntry(StyleEntry[].class);
 			}
 		}
 		
@@ -494,7 +495,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid tags: " + String.valueOf(cont.get("songTag")));
-				return Entry.forNullEntry(String[][].class);
+				return EntryPort.forNullEntry(String[][].class);
 			}
 		}
 		
@@ -517,7 +518,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid infos: " + String.valueOf(cont.get("songDescs")));
-				return Entry.forNullEntry(InfoEntry[].class);
+				return EntryPort.forNullEntry(InfoEntry[].class);
 			}
 		}
 		
@@ -542,7 +543,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid songs: " + String.valueOf(cont.get(n)));
-				return Entry.forNullEntry(SongEntry[].class);
+				return EntryPort.forNullEntry(SongEntry[].class);
 			}
 		}
 		
@@ -567,7 +568,7 @@ public final class Converter {
 				return ens;
 			} catch (RuntimeException ex) {
 				System.out.println("Not valid lyrics: " + String.valueOf(cont.get("songLyric")));
-				return Entry.forNullEntry(LyricEntry[].class);
+				return EntryPort.forNullEntry(LyricEntry[].class);
 			}
 		}
 		
@@ -582,13 +583,13 @@ public final class Converter {
 			if (ext)
 				System.out.println("Processing " + en.name + "...");
 			en.subName = Helper.parseValidString(cont, "newSubName");
-			if (en.subName == null || en.subName == Entry.NULL_STRING || en.subName.isEmpty())
+			if (en.subName == null || en.subName == EntryPort.NULL_STRING || en.subName.isEmpty())
 				en.subName = Helper.parseValidString(cont, "subName");
 			if (en.subName != null && en.subName.isEmpty())
-				en.subName = Entry.NULL_STRING;
+				en.subName = EntryPort.NULL_STRING;
 			en.translation = Helper.parseValidString(cont, "translation");
 			if (en.translation != null && en.translation.isEmpty())
-				en.translation = Entry.NULL_STRING;
+				en.translation = EntryPort.NULL_STRING;
 			en.artist = processArtist(cont);
 			en.album = Helper.parseValidEntry(cont, "albumId", "albumStringId", "albumName");
 			en.disc = Helper.parseValidInteger(cont, "cdSerial");
@@ -596,7 +597,7 @@ public final class Converter {
 				en.disc = null;
 			en.track = Helper.parseValidInteger(cont, "track");
 			if (en.track != null && en.track == 0)
-				en.track = Entry.NULL_INTEGER;
+				en.track = EntryPort.NULL_INTEGER;
 			en.length = Helper.parseValidInteger(cont, "length");
 			if (en.length != null && en.length == 0)
 				en.length = null;
@@ -604,11 +605,11 @@ public final class Converter {
 			if (en.pace != null && en.pace == 0)
 				en.pace = null;
 			en.highlightOffset = Helper.parseValidInteger(cont, "hotPartStartTime");
-			if (en.highlightOffset != null && en.highlightOffset != Entry.NULL_INTEGER) {
+			if (en.highlightOffset != null && en.highlightOffset != EntryPort.NULL_INTEGER) {
 				Long t = Helper.parseValidInteger(cont, "hotPartEndTime");
-				if (t != null && t != Entry.NULL_INTEGER)
-					t = (t > en.highlightOffset) ? t - en.highlightOffset : Entry.NULL_INTEGER;
-				if (en.highlightOffset == 0 && (t == null || t == Entry.NULL_INTEGER)) {
+				if (t != null && t != EntryPort.NULL_INTEGER)
+					t = (t > en.highlightOffset) ? t - en.highlightOffset : EntryPort.NULL_INTEGER;
+				if (en.highlightOffset == 0 && (t == null || t == EntryPort.NULL_INTEGER)) {
 					en.highlightOffset = null;
 				} else {
 					en.highlightLength = t;
@@ -648,7 +649,7 @@ public final class Converter {
 		
 	}
 	
-	public static Entry convertEntry(String typ, JSONObject o, boolean ext) {
+	public static MappedEntry convertEntry(String typ, JSONObject o, boolean ext) {
 		switch (typ) {
 		case "artist":
 			return ArtistConverter.convertArtistEntry(o, ext);
@@ -660,20 +661,20 @@ public final class Converter {
 			throw new IllegalArgumentException();
 		}
 	}
-	public static Entry convertEntry(String typ, String dat) {
+	public static MappedEntry convertEntry(String typ, String dat) {
 		return convertEntry(typ, JSON.parseObject(dat), true);
 	}
 	
-	public static List<Entry> convertJSONM(String typ, File f) throws IOException {
+	public static List<MappedEntry> convertJSONM(String typ, File f) throws IOException {
 		InputStream in = new FileInputStream(f);
 		BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-		List<Entry> li = new ArrayList<>();
+		List<MappedEntry> li = new ArrayList<>();
 		try {
 			Entry.getEntryClass(typ);
 			System.out.println("Converting " + f.getName() + "...");
 			String ln = null;
 			while ((ln = rdr.readLine()) != null) {
-				Entry en = null;
+				MappedEntry en = null;
 				try {
 					en = convertEntry(typ, ln);
 				} catch (RuntimeException ex) {

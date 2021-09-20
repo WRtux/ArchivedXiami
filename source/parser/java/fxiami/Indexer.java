@@ -11,19 +11,20 @@ import java.util.Set;
 
 import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
-import fxiami.entry.Entry;
+import fxiami.entry.EntryPort;
+import fxiami.entry.MappedEntry;
 import fxiami.entry.Helper;
 import fxiami.entry.ReferenceEntry;
 import fxiami.entry.SongEntry;
 
 public final class Indexer {
 	
-	static void writeEntryIndex(Entry en, String[] exts, DataOutput out) throws IOException {
+	static void writeEntryIndex(MappedEntry en, String[] exts, DataOutput out) throws IOException {
 		out.writeInt(0);
 		out.writeInt(0);
 		out.writeInt(en.id != null ? en.id.intValue() : 0xFFFFFFFF);
 		out.writeUTF(en.sid != null ? en.sid : "");
-		out.writeUTF(en.name != null && en.name != Entry.NULL_STRING ? en.name : "");
+		out.writeUTF(en.name != null && en.name != EntryPort.NULL_STRING ? en.name : "");
 		if (exts != null) {
 			out.writeShort(exts.length);
 			for (String str : exts) {
@@ -39,13 +40,13 @@ public final class Indexer {
 		try {
 			System.out.println("Indexing...");
 			long off, cur;
-			Map<Entry, long[]> mapOff = new LinkedHashMap<>();
+			Map<MappedEntry, long[]> mapOff = new LinkedHashMap<>();
 			rf.writeInt(0xFE581A4D);
 			off = rf.getFilePointer() + 4;
 			rf.seek(off);
 			for (ArtistEntry en : ArtistEntry.getAll()) {
 				String[] exts = null;
-				if (en.subName != null && en.subName != Entry.NULL_STRING)
+				if (en.subName != null && en.subName != EntryPort.NULL_STRING)
 					exts = new String[] {en.subName};
 				rf.writeByte(0x10);
 				mapOff.put(en, new long[] {rf.getFilePointer(), 0L, 0L});
@@ -53,11 +54,11 @@ public final class Indexer {
 			}
 			for (AlbumEntry en : AlbumEntry.getAll()) {
 				Set<String> set = new HashSet<>();
-				if (en.subName != null && en.subName != Entry.NULL_STRING)
+				if (en.subName != null && en.subName != EntryPort.NULL_STRING)
 					set.add(en.subName);
 				if (en.artists != null && !Helper.isNullArray(en.artists)) {
 					for (ReferenceEntry ren : en.artists) {
-						if (ren != null && ren.name != null && ren.name != Entry.NULL_STRING)
+						if (ren != null && ren.name != null && ren.name != EntryPort.NULL_STRING)
 							set.add(ren.name);
 					}
 				}
@@ -67,19 +68,19 @@ public final class Indexer {
 			}
 			for (SongEntry en : SongEntry.getAll()) {
 				Set<String> set = new HashSet<>();
-				if (en.subName != null && en.subName != Entry.NULL_STRING)
+				if (en.subName != null && en.subName != EntryPort.NULL_STRING)
 					set.add(en.subName);
-				if (en.translation != null && en.translation != Entry.NULL_STRING)
+				if (en.translation != null && en.translation != EntryPort.NULL_STRING)
 					set.add(en.translation);
-				if (en.artist != null && en.artist.name != null && en.artist.name != Entry.NULL_STRING)
+				if (en.artist != null && en.artist.name != null && en.artist.name != EntryPort.NULL_STRING)
 					set.add(en.artist.name);
 				if (en.singers != null && !Helper.isNullArray(en.singers)) {
 					for (ReferenceEntry ren : en.singers) {
-						if (ren != null && ren.name != null && ren.name != Entry.NULL_STRING)
+						if (ren != null && ren.name != null && ren.name != EntryPort.NULL_STRING)
 							set.add(ren.name);
 					}
 				}
-				if (en.album != null && en.album.name != null && en.album.name != Entry.NULL_STRING)
+				if (en.album != null && en.album.name != null && en.album.name != EntryPort.NULL_STRING)
 					set.add(en.album.name);
 				rf.writeByte(0x12);
 				mapOff.put(en, new long[] {rf.getFilePointer(), 0L, 0L});

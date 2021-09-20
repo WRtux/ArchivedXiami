@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class CategoryEntry {
+public class CategoryEntry implements EntryPort.Entry {
 	
 	public static final String entryName = "category";
 	
@@ -33,7 +33,7 @@ public class CategoryEntry {
 	public String name;
 	
 	public CategoryEntry(Long id, String n) {
-		if (id == null || id == Entry.NULL_INTEGER)
+		if (id == null || id == EntryPort.NULL_INTEGER)
 			throw new NullPointerException();
 		this.id = id;
 		this.name = n;

@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import fxiami.entry.CategoryEntry;
-import fxiami.entry.Entry;
+import fxiami.entry.MappedEntry;
 import fxiami.entry.StyleEntry;
 
 public final class Main {
@@ -96,7 +96,7 @@ public final class Main {
 				throw new InterruptedException("Not supported in command mode.");
 			if (args.length != 1)
 				throw new InterruptedException("Illegal argument count.");
-			Entry.clearAll();
+			MappedEntry.clearAll();
 			System.gc();
 			Runtime rt = Runtime.getRuntime();
 			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
@@ -125,7 +125,7 @@ public final class Main {
 		}
 		case "convert":
 			if (args.length == 3) {
-				List<Entry> li = Converter.convertJSONM(args[1], new File(args[2]));
+				List<MappedEntry> li = Converter.convertJSONM(args[1], new File(args[2]));
 				if (ext)
 					Loader.exportJSON(li, new File(args[1] + ".json"));
 			} else if (args.length == 4) {
@@ -155,8 +155,8 @@ public final class Main {
 	
 	static void interact() {
 		System.out.println("Enter interactive mode.");
+		Scanner sc = new Scanner(System.in);
 		while (true) {
-			Scanner sc = new Scanner(System.in);
 			System.out.print("> ");
 			String[] args = sc.nextLine().split(" ");
 			if (args.length == 1 && args[0].equals("exit"))
@@ -170,6 +170,7 @@ public final class Main {
 				ex.printStackTrace();
 			}
 		}
+		sc.close();
 	}
 	
 	public static void main(String[] args) throws IOException {

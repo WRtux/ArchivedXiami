@@ -19,14 +19,14 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import fxiami.entry.AlbumEntry;
 import fxiami.entry.ArtistEntry;
-import fxiami.entry.Entry;
+import fxiami.entry.MappedEntry;
 import fxiami.entry.EntryPort;
 import fxiami.entry.SongEntry;
 
 public final class Loader {
 	
-	public static List<Entry> loadJSON(String typ, File f) throws IOException {
-		List<Entry> li = new ArrayList<>();
+	public static List<MappedEntry> loadJSON(String typ, File f) throws IOException {
+		List<MappedEntry> li = new ArrayList<>();
 		InputStream in = new FileInputStream(f);
 		JSONReader rdr = new JSONReader(new BufferedReader(new InputStreamReader(in, "UTF-8")));
 		try {
@@ -34,13 +34,14 @@ public final class Loader {
 			rdr.startArray();
 			while (rdr.hasNext()) {
 				try {
-					li.add((Entry)EntryPort.parseJSON(typ, (JSONObject)rdr.readObject()));
+					li.add((MappedEntry)EntryPort.parseJSON(typ, (JSONObject)rdr.readObject()));
 				} catch (RuntimeException ex) {
 					System.err.println("Unexpected break:");
 					ex.printStackTrace();
 				}
 			}
 			rdr.endArray();
+			System.out.println("Load complete.");
 		} catch (Exception ex) {
 			System.err.println("Load failed.");
 			throw ex;
@@ -50,9 +51,9 @@ public final class Loader {
 		return li;
 	}
 	
-	static void writeArray(Collection<? extends Entry> co, JSONWriter wtr) {
+	static void writeArray(Collection<? extends MappedEntry> co, JSONWriter wtr) {
 		wtr.startArray();
-		for (Entry en : co) {
+		for (MappedEntry en : co) {
 			try {
 				wtr.writeValue(en.toJSON());
 			} catch (RuntimeException ex) {
@@ -63,7 +64,7 @@ public final class Loader {
 		wtr.endArray();
 	}
 	
-	public static void exportJSON(Collection<? extends Entry> co, File dest) throws IOException {
+	public static void exportJSON(Collection<? extends MappedEntry> co, File dest) throws IOException {
 		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
 		wtr.config(SerializerFeature.WriteMapNullValue, true);
 		try {
@@ -79,7 +80,7 @@ public final class Loader {
 		}
 	}
 	public static void exportJSON(String typ, File dest) throws IOException {
-		exportJSON(Entry.getAll(typ), dest);
+		exportJSON(MappedEntry.getAll(typ), dest);
 	}
 	
 	public static void exportJSON(File dest) throws IOException {

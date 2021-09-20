@@ -10,7 +10,7 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-public class SongEntry extends Entry {
+public class SongEntry extends MappedEntry {
 	
 	public static final String entryName = "song";
 	
@@ -172,7 +172,7 @@ public class SongEntry extends Entry {
 			en.styles = EntryPort.parseJSONArray(StyleEntry.class, cont.getJSONArray("styles"));
 		if (cont.containsKey("tags")) {
 			String[][] tags = cont.getObject("tags", String[][].class);
-			en.tags = (tags != null) ? tags : forNullEntry(String[][].class);
+			en.tags = (tags != null) ? tags : EntryPort.forNullEntry(String[][].class);
 		}
 		if (cont.containsKey("infos"))
 			en.infos = EntryPort.parseJSONArray(InfoEntry.class, cont.getJSONArray("infos"));
@@ -192,7 +192,7 @@ public class SongEntry extends Entry {
 		o.put("artist", this.artist != null ? this.artist.toJSON() : null);
 		if (this.singers != null) {
 			JSONArray arr = null;
-			if (this.singers != Entry.forNullEntry(ReferenceEntry[].class)) {
+			if (this.singers != EntryPort.forNullEntry(ReferenceEntry[].class)) {
 				arr = new JSONArray(this.singers.length);
 				for (ReferenceEntry en : this.singers) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -202,7 +202,7 @@ public class SongEntry extends Entry {
 		}
 		if (this.staffs != null) {
 			JSONArray arr = null;
-			if (this.staffs != Entry.forNullEntry(StaffEntry[].class)) {
+			if (this.staffs != EntryPort.forNullEntry(StaffEntry[].class)) {
 				arr = new JSONArray(this.staffs.length);
 				for (StaffEntry en : this.staffs) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -219,7 +219,7 @@ public class SongEntry extends Entry {
 		Helper.putValidInteger(o, "highlightLength", this.highlightLength);
 		if (this.styles != null) {
 			JSONArray arr = null;
-			if (this.styles != Entry.forNullEntry(StyleEntry[].class)) {
+			if (this.styles != EntryPort.forNullEntry(StyleEntry[].class)) {
 				arr = new JSONArray(this.styles.length);
 				for (StyleEntry en : this.styles) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -230,7 +230,7 @@ public class SongEntry extends Entry {
 		Helper.putValidArray(o, "tags", this.tags);
 		if (this.infos != null) {
 			JSONArray arr = null;
-			if (this.infos != Entry.forNullEntry(InfoEntry[].class)) {
+			if (this.infos != EntryPort.forNullEntry(InfoEntry[].class)) {
 				arr = new JSONArray(this.infos.length);
 				for (InfoEntry en : this.infos) {
 					arr.add(en != null ? en.toJSON() : null);
@@ -240,7 +240,7 @@ public class SongEntry extends Entry {
 		}
 		if (this.lyrics != null) {
 			JSONArray arr = null;
-			if (this.lyrics != Entry.forNullEntry(LyricEntry[].class)) {
+			if (this.lyrics != EntryPort.forNullEntry(LyricEntry[].class)) {
 				arr = new JSONArray(this.lyrics.length);
 				for (LyricEntry en : this.lyrics) {
 					arr.add(en != null ? en.toJSON() : null);

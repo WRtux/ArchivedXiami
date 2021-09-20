@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class StyleEntry {
+public class StyleEntry implements EntryPort.Entry {
 	
 	public static final String entryName = "style";
 	
@@ -34,9 +34,9 @@ public class StyleEntry {
 	public String name;
 	
 	public StyleEntry(Long gen, Long id, String n) {
-		if (id == null || id == Entry.NULL_INTEGER)
+		if (id == null || id == EntryPort.NULL_INTEGER)
 			throw new NullPointerException();
-		this.genre = (gen != Entry.NULL_INTEGER ? gen : null);
+		this.genre = (gen != EntryPort.NULL_INTEGER ? gen : null);
 		this.id = id;
 		this.name = n;
 		if (entryMap.containsKey(id))

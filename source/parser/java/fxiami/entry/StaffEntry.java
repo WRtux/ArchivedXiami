@@ -3,7 +3,7 @@ package fxiami.entry;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-public class StaffEntry {
+public class StaffEntry implements EntryPort.Entry {
 	
 	public static final String entryName = "staff";
 	
@@ -13,7 +13,7 @@ public class StaffEntry {
 	public ReferenceEntry[] artists;
 	
 	public StaffEntry(String typ) {
-		if (typ == null || typ == Entry.NULL_STRING)
+		if (typ == null || typ == EntryPort.NULL_STRING)
 			throw new NullPointerException();
 		this.type = typ;
 	}
@@ -32,7 +32,7 @@ public class StaffEntry {
 		Helper.putValidString(o, "name", this.name);
 		if (this.artists != null) {
 			JSONArray arr = null;
-			if (this.artists != Entry.forNullEntry(ReferenceEntry[].class)) {
+			if (this.artists != EntryPort.forNullEntry(ReferenceEntry[].class)) {
 				arr = new JSONArray(this.artists.length);
 				for (ReferenceEntry en : this.artists) {
 					arr.add(en != null ? en.toJSON() : null);

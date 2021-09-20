@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
-public abstract class Entry {
+public abstract class MappedEntry implements EntryPort.Entry {
 	
 	protected static final Map<Class<?>, Object> nullEntryMap = new HashMap<>();
 	
@@ -36,7 +36,7 @@ public abstract class Entry {
 		return o;
 	}
 	
-	public static Class<? extends Entry> getEntryClass(String typ) {
+	public static Class<? extends MappedEntry> getEntryClass(String typ) {
 		switch (typ) {
 		case "artist":
 			return ArtistEntry.class;
@@ -49,7 +49,7 @@ public abstract class Entry {
 		}
 	}
 	
-	public static Collection<? extends Entry> getAll(String typ) {
+	public static Collection<? extends MappedEntry> getAll(String typ) {
 		switch (typ) {
 		case "artist":
 			return ArtistEntry.getAll();
@@ -77,9 +77,9 @@ public abstract class Entry {
 	
 	public String name;
 	
-	protected Entry(Long id, String sid, boolean dummy) {
-		this.id = (id != Entry.NULL_INTEGER ? id : null);
-		this.sid = (sid != Entry.NULL_STRING ? sid : null);
+	protected MappedEntry(Long id, String sid, boolean dummy) {
+		this.id = (id != EntryPort.NULL_INTEGER ? id : null);
+		this.sid = (sid != EntryPort.NULL_STRING ? sid : null);
 		this.dummy = dummy;
 	}
 	

@@ -2,7 +2,7 @@ package fxiami.entry;
 
 import com.alibaba.fastjson.JSONObject;
 
-public final class ReferenceEntry extends Entry {
+public final class ReferenceEntry extends MappedEntry {
 	
 	public static final String entryName = "reference";
 	
@@ -40,7 +40,7 @@ public final class ReferenceEntry extends Entry {
 		return SongEntry.matchEntry(this.id, this.sid);
 	}
 	
-	public Entry getEntry(String typ) {
+	public MappedEntry getEntry(String typ) {
 		switch (typ) {
 		case "artist":
 			return this.getArtistEntry();
