@@ -1,7 +1,7 @@
 package fxiami.entry;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -53,24 +53,41 @@ public final class EntryPort {
 		return o;
 	}
 	
-	public static boolean registerEntryClass(String n, Class<? extends Entry> cls) {
-		if (entryClassMap.containsKey(cls))
-			return false;
-		Method smth, meth;
+	@SuppressWarnings("unchecked")
+	static <T> T getClassConstant(Class<?> cls, String n, Class<T> typ) {
 		try {
-			if (n == null)
-				n = (String)cls.getDeclaredField("entryName").get(null);
-			smth = cls.getDeclaredMethod("parseJSON", JSONObject.class);
-			meth = cls.getMethod("toJSON");
-		} catch (ReflectiveOperationException ex) {
-			throw new ClassCastException();
+			Field var = cls.getDeclaredField(n);
+			if (!Modifier.isStatic(var.getModifiers()) || !typ.isAssignableFrom(var.getType()))
+				throw new ClassCastException("Malformed constant: " + var.toString());
+			return (T)var.get(null);
+		} catch (NoSuchFieldException ex) {
+			return null;
+		} catch (IllegalAccessException ex) {
+			throw new IllegalStateException(ex);
 		}
-		if (!cls.isAssignableFrom(smth.getReturnType()) || !Modifier.isStatic(smth.getModifiers())
-				|| meth.getReturnType() != JSONObject.class)
-			throw new ClassCastException();
+	}
+	
+	static Method getClassMethod(Class<?> cls, String n, boolean typ, Class<?> ret, Class<?>... params) {
+		Method meth;
+		try {
+			meth = typ ? cls.getDeclaredMethod(n, params) : cls.getMethod(n, params);
+		} catch (NoSuchMethodException ex) {
+			return null;
+		}
+		if (Modifier.isStatic(meth.getModifiers()) ^ typ || !ret.isAssignableFrom(meth.getReturnType()))
+			throw new ClassCastException("Malformed method: " + meth.toString());
+		return meth;
+	}
+	
+	public static boolean registerEntryClass(String n, Class<? extends Entry> cls) {
+		if (entryClassMap.containsValue(cls))
+			return false;
+		n = (n != null) ? n : getClassConstant(cls, "entryName", String.class);
+		if (n == null)
+			throw new NullPointerException();
 		entryClassMap.put(n, cls);
-		parseMehtodMap.put(cls, smth);
-		toJSONMethodMap.put(cls, meth);
+		parseMehtodMap.put(cls, getClassMethod(cls, "parseJSON", true, cls, JSONObject.class));
+		toJSONMethodMap.put(cls, getClassMethod(cls, "toJSON", false, JSONObject.class));
 		return true;
 	}
 	public static boolean registerEntryClass(Class<? extends Entry> cls) {
@@ -87,10 +104,8 @@ public final class EntryPort {
 			return null;
 		try {
 			return (T)parseMehtodMap.get(cls).invoke(null, cont);
-		} catch (IllegalAccessException ex) {
-			throw new IllegalStateException();
-		} catch (InvocationTargetException ex) {
-			throw (RuntimeException)ex.getCause();
+		} catch (ReflectiveOperationException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 	public static Object parseJSON(String typ, JSONObject cont) {
@@ -117,10 +132,8 @@ public final class EntryPort {
 			return null;
 		try {
 			return (JSONObject)toJSONMethodMap.get(en.getClass()).invoke(en);
-		} catch (IllegalAccessException ex) {
-			throw new IllegalStateException();
-		} catch (InvocationTargetException ex) {
-			throw (RuntimeException)ex.getCause();
+		} catch (ReflectiveOperationException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 	

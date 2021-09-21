@@ -1,71 +1,43 @@
 package fxiami.entry;
 
-import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
 public abstract class MappedEntry implements EntryPort.Entry {
 	
-	protected static final Map<Class<?>, Object> nullEntryMap = new HashMap<>();
-	
-	public static final Long NULL_INTEGER = new Long(0x80000000_00000000L);
-	public static final Double NULL_FLOAT = Double.longBitsToDouble(0xFFF80000_00000000L);
-	public static final Boolean NULL_BOOLEAN = new Boolean(false);
-	public static final String NULL_STRING = new String(new char[] {0});
-	public static final Object[] NULL_OBJECT_ARRAY = new Object[0];
-	
-	static {
-		nullEntryMap.put(Number.class, NULL_INTEGER);
-		nullEntryMap.put(Long.class, NULL_INTEGER);
-		nullEntryMap.put(Double.class, NULL_FLOAT);
-		nullEntryMap.put(Boolean.class, NULL_BOOLEAN);
-		nullEntryMap.put(String.class, NULL_STRING);
-		nullEntryMap.put(Object[].class, NULL_OBJECT_ARRAY);
+	public static Class<? extends MappedEntry> getEntryClass(String typ) {
+		Class<? extends EntryPort.Entry> cls = EntryPort.getEntryClass(typ);
+		return MappedEntry.class.isAssignableFrom(cls) ? cls.asSubclass(MappedEntry.class) : null;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T forNullEntry(Class<T> cls) {
-		T o = (T)nullEntryMap.get(cls);
-		if (o == null && cls.isArray()) {
-			o = (T)Array.newInstance(cls.getComponentType(), 0);
-			nullEntryMap.put(cls, o);
-		}
-		return o;
-	}
-	
-	public static Class<? extends MappedEntry> getEntryClass(String typ) {
-		switch (typ) {
-		case "artist":
-			return ArtistEntry.class;
-		case "album":
-			return AlbumEntry.class;
-		case "song":
-			return SongEntry.class;
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
-	
 	public static Collection<? extends MappedEntry> getAll(String typ) {
-		switch (typ) {
-		case "artist":
-			return ArtistEntry.getAll();
-		case "album":
-			return AlbumEntry.getAll();
-		case "song":
-			return SongEntry.getAll();
-		default:
+		Class<? extends MappedEntry> cls = getEntryClass(typ);
+		if (cls == null)
 			throw new IllegalArgumentException();
+		Method meth = EntryPort.getClassMethod(cls, "getAll", true, Collection.class);
+		try {
+			return meth != null ? (Collection<? extends MappedEntry>)meth.invoke(null) : null;
+		} catch (ReflectiveOperationException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 	
 	public static void clearAll() {
-		ArtistEntry.clearAll();
-		AlbumEntry.clearAll();
-		SongEntry.clearAll();
+		for (Class<? extends EntryPort.Entry> cls : EntryPort.entryClassMap.values()) {
+			if (!MappedEntry.class.isAssignableFrom(cls))
+				continue;
+			Method meth = EntryPort.getClassMethod(cls, "clearAll", true, void.class);
+			if (meth != null) {
+				try {
+					meth.invoke(null);
+				} catch (ReflectiveOperationException ex) {
+					throw new IllegalStateException(ex);
+				}
+			}
+		}
 	}
 	
 	public final Long id;
