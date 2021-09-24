@@ -1,12 +1,14 @@
 package fxiami;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +28,8 @@ import fxiami.entry.SongEntry;
 public final class Loader {
 	
 	public static List<MappedEntry> loadJSON(String typ, File f) throws IOException {
+		if (MappedEntry.getEntryClass(typ) == null)
+			throw new IllegalArgumentException("Unknown entry type.");
 		List<MappedEntry> li = new ArrayList<>();
 		InputStream in = new FileInputStream(f);
 		JSONReader rdr = new JSONReader(new BufferedReader(new InputStreamReader(in, "UTF-8")));
@@ -47,6 +51,7 @@ public final class Loader {
 			throw ex;
 		} finally {
 			rdr.close();
+			in.close();
 		}
 		return li;
 	}
@@ -65,7 +70,8 @@ public final class Loader {
 	}
 	
 	public static void exportJSON(Collection<? extends MappedEntry> co, File dest) throws IOException {
-		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
+		OutputStream out = new FileOutputStream(dest);
+		JSONWriter wtr = new JSONWriter(new BufferedWriter(new OutputStreamWriter(out, "UTF-8")));
 		wtr.config(SerializerFeature.WriteMapNullValue, true);
 		try {
 			System.out.println("Exporting...");
@@ -75,7 +81,8 @@ public final class Loader {
 			System.err.println("Export failed.");
 			throw ex;
 		} finally {
-			wtr.close();
+			wtr.flush();
+			out.close();
 			System.gc();
 		}
 	}
@@ -84,7 +91,8 @@ public final class Loader {
 	}
 	
 	public static void exportJSON(File dest) throws IOException {
-		JSONWriter wtr = new JSONWriter(new OutputStreamWriter(new FileOutputStream(dest), "UTF-8"));
+		OutputStream out = new FileOutputStream(dest);
+		JSONWriter wtr = new JSONWriter(new BufferedWriter(new OutputStreamWriter(out, "UTF-8")));
 		wtr.config(SerializerFeature.WriteMapNullValue, true);
 		try {
 			System.out.println("Exporting...");
@@ -101,7 +109,8 @@ public final class Loader {
 			System.err.println("Export failed.");
 			throw ex;
 		} finally {
-			wtr.close();
+			wtr.flush();
+			out.close();
 			System.gc();
 		}
 	}

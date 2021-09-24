@@ -16,7 +16,7 @@ public abstract class MappedEntry implements EntryPort.Entry {
 	public static Collection<? extends MappedEntry> getAll(String typ) {
 		Class<? extends MappedEntry> cls = getEntryClass(typ);
 		if (cls == null)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Not a mapped entry type.");
 		Method meth = EntryPort.getClassMethod(cls, "getAll", true, Collection.class);
 		try {
 			return meth != null ? (Collection<? extends MappedEntry>)meth.invoke(null) : null;

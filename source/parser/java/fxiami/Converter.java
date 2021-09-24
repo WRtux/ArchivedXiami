@@ -658,7 +658,7 @@ public final class Converter {
 		case "song":
 			return SongConverter.convertSongEntry(o, ext);
 		default:
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Unknown entry type.");
 		}
 	}
 	public static MappedEntry convertEntry(String typ, String dat) {
@@ -666,11 +666,12 @@ public final class Converter {
 	}
 	
 	public static List<MappedEntry> convertJSONM(String typ, File f) throws IOException {
+		if (MappedEntry.getEntryClass(typ) == null)
+			throw new IllegalArgumentException("Unknown entry type.");
 		InputStream in = new FileInputStream(f);
 		BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 		List<MappedEntry> li = new ArrayList<>();
 		try {
-			Entry.getEntryClass(typ);
 			System.out.println("Converting " + f.getName() + "...");
 			String ln = null;
 			while ((ln = rdr.readLine()) != null) {

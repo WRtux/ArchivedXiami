@@ -142,9 +142,9 @@ public final class Main {
 			if (ext ? args.length != 4 : args.length != 1)
 				throw new InterruptedException("Illegal argument count.");
 			if (ext) {
-				Converter.convertJSONM("artist", new File(args[1]));
-				Converter.convertJSONM("album", new File(args[2]));
-				Converter.convertJSONM("song", new File(args[3]));
+				Loader.loadJSON("artist", new File(args[1]));
+				Loader.loadJSON("album", new File(args[2]));
+				Loader.loadJSON("song", new File(args[3]));
 			}
 			Indexer.exportIndex(new File("hybrid.ijsom"));
 			break;

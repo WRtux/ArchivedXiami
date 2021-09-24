@@ -1,12 +1,14 @@
 package fxiami;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
@@ -44,7 +46,8 @@ public final class Extractor {
 	}
 	
 	public static void extractRaw(String typ, File[] src, File dest) throws IOException {
-		Writer wtr = new OutputStreamWriter(new FileOutputStream(dest), "UTF-8");
+		OutputStream out = new FileOutputStream(dest);
+		Writer wtr = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
 		try {
 			System.out.println("Extracting " + src.length + " files...");
 			for (File f : src) {
