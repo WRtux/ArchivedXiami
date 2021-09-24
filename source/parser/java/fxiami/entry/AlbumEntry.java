@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class AlbumEntry extends MappedEntry {
@@ -181,52 +180,20 @@ public class AlbumEntry extends MappedEntry {
 		JSONObject o = super.toJSON();
 		Helper.putValidString(o, "subName", this.subName);
 		Helper.putValidString(o, "logoURL", this.logoURL);
-		if (this.artists != null) {
-			JSONArray arr = null;
-			if (this.artists != EntryPort.forNullEntry(ReferenceEntry[].class)) {
-				arr = new JSONArray(this.artists.length);
-				for (ReferenceEntry en : this.artists) {
-					arr.add(en != null ? en.toJSON() : null);
-				}
-			}
-			o.put("artists", arr);
-		}
-		if (this.companies != null) {
-			JSONArray arr = null;
-			if (this.artists != EntryPort.forNullEntry(ReferenceEntry[].class)) {
-				arr = new JSONArray(this.companies.length);
-				for (ReferenceEntry en : this.companies) {
-					arr.add(en != null ? en.toJSON() : null);
-				}
-			}
-			o.put("companies", arr);
-		}
-		o.put("category", this.category != null ? this.category.toJSON() : null);
+		if (this.artists != null)
+			o.put("artists", EntryPort.toJSONArray(this.artists));
+		if (this.companies != null)
+			o.put("companies", EntryPort.toJSONArray(this.companies));
+		o.put("category", EntryPort.toJSON(this.category));
 		Helper.putValidInteger(o, "discCount", this.discCount);
 		Helper.putValidInteger(o, "songCount", this.songCount);
 		Helper.putValidInteger(o, "publishTime", this.publishTime);
 		Helper.putValidString(o, "language", this.language);
-		if (this.styles != null) {
-			JSONArray arr = null;
-			if (this.styles != EntryPort.forNullEntry(StyleEntry[].class)) {
-				arr = new JSONArray(this.styles.length);
-				for (StyleEntry en : this.styles) {
-					arr.add(en != null ? en.toJSON() : null);
-				}
-			}
-			o.put("styles", arr);
-		}
+		if (this.styles != null)
+			o.put("styles", EntryPort.toJSONArray(this.styles));
 		Helper.putValidString(o, "info", this.info);
-		if (this.songs != null) {
-			JSONArray arr = null;
-			if (this.songs != EntryPort.forNullEntry(ReferenceEntry[].class)) {
-				arr = new JSONArray(this.songs.length);
-				for (ReferenceEntry en : this.songs) {
-					arr.add(en != null ? en.toJSON() : null);
-				}
-			}
-			o.put("songs", arr);
-		}
+		if (this.songs != null)
+			o.put("songs", EntryPort.toJSONArray(this.songs));
 		Helper.putValidInteger(o, "grade", this.grade);
 		Helper.putValidInteger(o, "gradeCount", this.gradeCount);
 		Helper.putValidInteger(o, "playCount", this.playCount);

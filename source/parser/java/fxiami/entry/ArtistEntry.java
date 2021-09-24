@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class ArtistEntry extends MappedEntry {
@@ -166,17 +165,9 @@ public class ArtistEntry extends MappedEntry {
 		Helper.putValidString(o, "gender", this.gender);
 		Helper.putValidInteger(o, "birthday", this.birthday);
 		Helper.putValidString(o, "area", this.area);
-		o.put("category", this.category != null ? this.category.toJSON() : null);
-		if (this.styles != null) {
-			JSONArray arr = null;
-			if (this.styles != EntryPort.forNullEntry(StyleEntry[].class)) {
-				arr = new JSONArray(this.styles.length);
-				for (StyleEntry en : this.styles) {
-					arr.add(en != null ? en.toJSON() : null);
-				}
-			}
-			o.put("styles", arr);
-		}
+		o.put("category", EntryPort.toJSON(this.category));
+		if (this.styles != null)
+			o.put("styles", EntryPort.toJSONArray(this.styles));
 		Helper.putValidString(o, "info", this.info);
 		Helper.putValidInteger(o, "playCount", this.playCount);
 		Helper.putValidInteger(o, "likeCount", this.likeCount);

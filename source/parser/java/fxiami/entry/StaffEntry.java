@@ -1,6 +1,5 @@
 package fxiami.entry;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class StaffEntry implements EntryPort.Entry {
@@ -30,16 +29,8 @@ public class StaffEntry implements EntryPort.Entry {
 		JSONObject o = new JSONObject(true);
 		o.put("type", this.type);
 		Helper.putValidString(o, "name", this.name);
-		if (this.artists != null) {
-			JSONArray arr = null;
-			if (this.artists != EntryPort.forNullEntry(ReferenceEntry[].class)) {
-				arr = new JSONArray(this.artists.length);
-				for (ReferenceEntry en : this.artists) {
-					arr.add(en != null ? en.toJSON() : null);
-				}
-			}
-			o.put("artists", arr);
-		}
+		if (this.artists != null)
+			o.put("artists", EntryPort.toJSONArray(this.artists));
 		return o;
 	}
 	
