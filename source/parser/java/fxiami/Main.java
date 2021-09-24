@@ -57,7 +57,7 @@ public final class Main {
 				throw new InterruptedException("Not supported in command mode.");
 			if (args.length != 2)
 				throw new InterruptedException("Illegal argument count.");
-			//TODO
+			Loader.loadJSON(new File(args[1]));
 			break;
 		case "list":
 			if (args.length != 2)
