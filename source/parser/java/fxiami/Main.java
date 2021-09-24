@@ -38,13 +38,14 @@ public final class Main {
 	}
 	
 	static void dispatchAction(String[] args, boolean ext) throws InterruptedException, IOException {
+		int len = args.length;
 		switch (args[0]) {
 		case "load":
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
-			if (args.length == 3) {
+			if (len == 3) {
 				Loader.loadJSON(args[1], new File(args[2]));
-			} else if (args.length == 4) {
+			} else if (len == 4) {
 				Loader.loadJSON("artist", new File(args[1]));
 				Loader.loadJSON("album", new File(args[2]));
 				Loader.loadJSON("song", new File(args[3]));
@@ -55,12 +56,12 @@ public final class Main {
 		case "load-hybrid":
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 2)
+			if (len != 2)
 				throw new InterruptedException("Illegal argument count.");
 			Loader.loadJSON(new File(args[1]));
 			break;
 		case "list":
-			if (args.length != 2)
+			if (len != 2)
 				throw new InterruptedException("Illegal argument count.");
 			switch (args[1]) {
 			case "category":
@@ -80,21 +81,27 @@ public final class Main {
 		case "export":
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 2)
+			if (len == 2 || len == 3) {
+				Loader.exportJSON(args[1], new File(len == 3 ? args[2] : args[1] + ".json"));
+			} else if (len == 1 || len == 4) {
+				Loader.exportJSON("artist", new File(len == 4 ? args[1] : "artist.json"));
+				Loader.exportJSON("album", new File(len == 4 ? args[2] : "album.json"));
+				Loader.exportJSON("song", new File(len == 4 ? args[3] : "song.json"));
+			} else {
 				throw new InterruptedException("Illegal argument count.");
-			Loader.exportJSON(args[1], new File(args[1] + ".json"));
+			}
 			break;
 		case "export-hybrid":
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 1)
+			if (len != 1 && len != 2)
 				throw new InterruptedException("Illegal argument count.");
-			Loader.exportJSON(new File("hybrid.json"));
+			Loader.exportJSON(new File(len == 2 ? args[1] : "hybrid.json"));
 			break;
 		case "clear": {
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 1)
+			if (len != 1)
 				throw new InterruptedException("Illegal argument count.");
 			MappedEntry.clearAll();
 			System.gc();
@@ -106,7 +113,7 @@ public final class Main {
 		case "free": {
 			if (ext)
 				throw new InterruptedException("Not supported in command mode.");
-			if (args.length != 1)
+			if (len != 1)
 				throw new InterruptedException("Illegal argument count.");
 			Runtime rt = Runtime.getRuntime();
 			long mem = Math.round((rt.totalMemory() - rt.freeMemory()) / 1024.0);
@@ -117,37 +124,42 @@ public final class Main {
 			break;
 		}
 		case "extract": {
-			if (args.length != 3)
+			if (len != 3 && len != 4)
 				throw new InterruptedException("Illegal argument count.");
 			File[] fs = new File(args[2]).listFiles();
-			Extractor.extractRaw(args[1], fs, new File(args[1] + ".jsonm"));
+			Extractor.extractRaw(args[1], fs, new File(len == 4 ? args[3] : args[1] + ".jsonm"));
 			break;
 		}
 		case "convert":
-			if (args.length == 3) {
+			if (len == 3) {
 				List<MappedEntry> li = Converter.convertJSONM(args[1], new File(args[2]));
 				if (ext)
 					Loader.exportJSON(li, new File(args[1] + ".json"));
-			} else if (args.length == 4) {
+			} else if (len == 4 || ext && len == 5) {
 				Converter.convertJSONM("artist", new File(args[1]));
 				Converter.convertJSONM("album", new File(args[2]));
 				Converter.convertJSONM("song", new File(args[3]));
 				if (ext)
-					Loader.exportJSON(new File("hybrid.json"));
+					Loader.exportJSON(new File(len == 5 ? args[4] : "hybrid.json"));
 			} else {
 				throw new InterruptedException("Illegal argument count.");
 			}
 			break;
-		case "index":
-			if (ext ? args.length != 4 : args.length != 1)
+		case "index": {
+			if (ext ? len != 4 && len != 5 : len != 1 && len != 2)
 				throw new InterruptedException("Illegal argument count.");
+			File f;
 			if (ext) {
 				Loader.loadJSON("artist", new File(args[1]));
 				Loader.loadJSON("album", new File(args[2]));
 				Loader.loadJSON("song", new File(args[3]));
+				f = new File(len == 5 ? args[4] : "hybrid.ijsom");
+			} else {
+				f = new File(len == 2 ? args[1] : "hybrid.ijsom");
 			}
-			Indexer.exportIndex(new File("hybrid.ijsom"));
+			Indexer.exportIndex(f);
 			break;
+		}
 		default:
 			throw new InterruptedException("Unknown action.");
 		}
