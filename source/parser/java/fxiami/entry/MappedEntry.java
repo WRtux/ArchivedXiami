@@ -9,7 +9,8 @@ public abstract class MappedEntry implements EntryPort.Entry {
 	
 	public static Class<? extends MappedEntry> getEntryClass(String typ) {
 		Class<? extends EntryPort.Entry> cls = EntryPort.getEntryClass(typ);
-		return MappedEntry.class.isAssignableFrom(cls) ? cls.asSubclass(MappedEntry.class) : null;
+		return (cls != null && MappedEntry.class.isAssignableFrom(cls)) ?
+			cls.asSubclass(MappedEntry.class) : null;
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -37,12 +38,10 @@ public final class Main {
 		rdr.close();
 	}
 	
-	static void dispatchAction(String[] args, boolean ext) throws InterruptedException, IOException {
+	static void dispatchAction(String[] args) throws InterruptedException, IOException {
 		int len = args.length;
 		switch (args[0]) {
 		case "load":
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
 			if (len == 3) {
 				Loader.loadJSON(args[1], new File(args[2]));
 			} else if (len == 4) {
@@ -54,8 +53,6 @@ public final class Main {
 			}
 			break;
 		case "load-hybrid":
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
 			if (len != 2)
 				throw new InterruptedException("Illegal argument count.");
 			Loader.loadJSON(new File(args[1]));
@@ -79,8 +76,6 @@ public final class Main {
 			}
 			break;
 		case "export":
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
 			if (len == 2 || len == 3) {
 				Loader.exportJSON(args[1], new File(len == 3 ? args[2] : args[1] + ".json"));
 			} else if (len == 1 || len == 4) {
@@ -92,15 +87,11 @@ public final class Main {
 			}
 			break;
 		case "export-hybrid":
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
 			if (len != 1 && len != 2)
 				throw new InterruptedException("Illegal argument count.");
 			Loader.exportJSON(new File(len == 2 ? args[1] : "hybrid.json"));
 			break;
 		case "clear": {
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
 			if (len != 1)
 				throw new InterruptedException("Illegal argument count.");
 			MappedEntry.clearAll();
@@ -111,8 +102,6 @@ public final class Main {
 			break;
 		}
 		case "free": {
-			if (ext)
-				throw new InterruptedException("Not supported in command mode.");
 			if (len != 1)
 				throw new InterruptedException("Illegal argument count.");
 			Runtime rt = Runtime.getRuntime();
@@ -132,34 +121,22 @@ public final class Main {
 		}
 		case "convert":
 			if (len == 3) {
-				List<MappedEntry> li = Converter.convertJSONM(args[1], new File(args[2]));
-				if (ext)
-					Loader.exportJSON(li, new File(args[1] + ".json"));
-			} else if (len == 4 || ext && len == 5) {
+				Converter.convertJSONM(args[1], new File(args[2]));
+			} else if (len == 4) {
 				Converter.convertJSONM("artist", new File(args[1]));
 				Converter.convertJSONM("album", new File(args[2]));
 				Converter.convertJSONM("song", new File(args[3]));
-				if (ext)
-					Loader.exportJSON(new File(len == 5 ? args[4] : "hybrid.json"));
 			} else {
 				throw new InterruptedException("Illegal argument count.");
 			}
 			break;
-		case "index": {
-			if (ext ? len != 4 && len != 5 : len != 1 && len != 2)
+		case "index":
+			if (len != 1 && len != 2)
 				throw new InterruptedException("Illegal argument count.");
-			File f;
-			if (ext) {
-				Loader.loadJSON("artist", new File(args[1]));
-				Loader.loadJSON("album", new File(args[2]));
-				Loader.loadJSON("song", new File(args[3]));
-				f = new File(len == 5 ? args[4] : "hybrid.ijsom");
-			} else {
-				f = new File(len == 2 ? args[1] : "hybrid.ijsom");
-			}
-			Indexer.exportIndex(f);
+			Indexer.exportIndex(new File(len == 2 ? args[1] : "hybrid.ijsom"));
 			break;
-		}
+		case "exit":
+			throw new InterruptedException(len == 1 ? null : "Illegal argument count.");
 		default:
 			throw new InterruptedException("Unknown action.");
 		}
@@ -170,12 +147,12 @@ public final class Main {
 		Scanner sc = new Scanner(System.in);
 		while (true) {
 			System.out.print("> ");
-			String[] args = sc.nextLine().split(" ");
-			if (args.length == 1 && args[0].equals("exit"))
-				break;
 			try {
-				dispatchAction(args, false);
+				String[] args = sc.nextLine().split(" ");
+				dispatchAction(args);
 			} catch (InterruptedException ex) {
+				if (ex.getMessage() == null)
+					break;
 				System.out.println(ex.getMessage());
 			} catch (Exception ex) {
 				System.err.println("Unexpected break:");
@@ -185,16 +162,26 @@ public final class Main {
 		sc.close();
 	}
 	
-	public static void main(String[] args) throws IOException {
-		loadData();
-		if (args.length == 0 || args.length == 1 && args[0].equals("interact")) {
-			interact();
-			return;
-		}
+	public static void main(String[] args) {
 		try {
-			dispatchAction(args, true);
-		} catch (InterruptedException ex) {
-			System.err.println(ex.getMessage());
+			loadData();
+			List<String> argli = new ArrayList<>();
+			for (int i = 0; i <= args.length; i++) {
+				if (i != args.length && !args[i].equals(";")) {
+					argli.add(args[i]);
+				} else {
+					if (argli.size() > 0) {
+						dispatchAction(argli.toArray(new String[0]));
+						argli.clear();
+					}
+				}
+			}
+			interact();
+		} catch (Exception ex) {
+			if (ex instanceof InterruptedException && ex.getMessage() == null)
+				return;
+			System.err.println("Unexpected break:");
+			ex.printStackTrace();
 		}
 	}
 	
