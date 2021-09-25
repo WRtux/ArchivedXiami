@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -40,6 +42,8 @@ public final class Main {
 	
 	static void dispatchAction(String[] args) throws InterruptedException, IOException {
 		int len = args.length;
+		if (len == 0)
+			return;
 		switch (args[0]) {
 		case "load":
 			if (len == 3) {
@@ -145,11 +149,18 @@ public final class Main {
 	static void interact() {
 		System.out.println("Enter interactive mode.");
 		Scanner sc = new Scanner(System.in);
+		// \s*(?:"([^"]*)"(?=\s|$)|(\S+))
+		Pattern regex = Pattern.compile("\\s*(?:\"([^\"]*)\"(?=\\s|$)|(\\S+))");
 		while (true) {
 			System.out.print("> ");
 			try {
-				String[] args = sc.nextLine().split(" ");
-				dispatchAction(args);
+				Matcher mat = regex.matcher(sc.nextLine());
+				List<String> argli = new ArrayList<>();
+				while (mat.find()) {
+					String arg = mat.group(2);
+					argli.add(arg != null ? arg : mat.group(1));
+				}
+				dispatchAction(argli.toArray(new String[0]));
 			} catch (InterruptedException ex) {
 				if (ex.getMessage() == null)
 					break;
