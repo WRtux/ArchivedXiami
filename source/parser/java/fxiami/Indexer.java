@@ -74,12 +74,12 @@ public final class Indexer {
 					set.add(en.translation);
 				if (en.artist != null && en.artist.name != null && en.artist.name != EntryPort.NULL_STRING)
 					set.add(en.artist.name);
-				if (en.singers != null && !Helper.isNullArray(en.singers)) {
-					for (ReferenceEntry ren : en.singers) {
-						if (ren != null && ren.name != null && ren.name != EntryPort.NULL_STRING)
-							set.add(ren.name);
-					}
-				}
+//				if (en.singers != null && !Helper.isNullArray(en.singers)) {
+//					for (ReferenceEntry ren : en.singers) {
+//						if (ren != null && ren.name != null && ren.name != EntryPort.NULL_STRING)
+//							set.add(ren.name);
+//					}
+//				}
 				if (en.album != null && en.album.name != null && en.album.name != EntryPort.NULL_STRING)
 					set.add(en.album.name);
 				rf.writeByte(0x12);

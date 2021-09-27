@@ -51,8 +51,8 @@ public abstract class MappedEntry implements EntryPort.Entry {
 	public String name;
 	
 	protected MappedEntry(Long id, String sid, boolean dummy) {
-		this.id = (id != EntryPort.NULL_INTEGER ? id : null);
-		this.sid = (sid != EntryPort.NULL_STRING ? sid : null);
+		this.id = (id != EntryPort.NULL_INTEGER) ? id : null;
+		this.sid = (sid != EntryPort.NULL_STRING) ? sid : null;
 		this.dummy = dummy;
 	}
 	

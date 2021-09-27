@@ -17,7 +17,7 @@ public class LyricEntry implements EntryPort.Entry {
 	public String contentURL;
 	
 	public LyricEntry(Long id, Long typ, String url) {
-		this.id = (id != EntryPort.NULL_INTEGER ? id : null);
+		this.id = (id != EntryPort.NULL_INTEGER) ? id : null;
 		this.type = typ;
 		this.contentURL = url;
 	}

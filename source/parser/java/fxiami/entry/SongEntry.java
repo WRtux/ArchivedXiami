@@ -111,7 +111,6 @@ public class SongEntry extends MappedEntry {
 	public String translation;
 	
 	public ReferenceEntry artist;
-	public ReferenceEntry[] singers;
 	public StaffEntry[] staffs;
 	
 	public ReferenceEntry album;
@@ -156,8 +155,6 @@ public class SongEntry extends MappedEntry {
 		en.subName = Helper.parseValidString(cont, "subName");
 		en.translation = Helper.parseValidString(cont, "translation");
 		en.artist = EntryPort.parseJSON(ReferenceEntry.class, cont.getJSONObject("artist"));
-		if (cont.containsKey("singers"))
-			en.singers = EntryPort.parseJSONArray(ReferenceEntry.class, cont.getJSONArray("singers"));
 		if (cont.containsKey("staffs"))
 			en.staffs = EntryPort.parseJSONArray(StaffEntry.class, cont.getJSONArray("staffs"));
 		en.album = EntryPort.parseJSON(ReferenceEntry.class, cont.getJSONObject("album"));
@@ -189,8 +186,6 @@ public class SongEntry extends MappedEntry {
 		Helper.putValidString(o, "subName", this.subName);
 		Helper.putValidString(o, "translation", this.translation);
 		o.put("artist", EntryPort.toJSON(this.artist));
-		if (this.singers != null)
-			o.put("singers", EntryPort.toJSONArray(this.singers));
 		if (this.staffs != null)
 			o.put("staffs", EntryPort.toJSONArray(this.staffs));
 		o.put("album", EntryPort.toJSON(this.album));

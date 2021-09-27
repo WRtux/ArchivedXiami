@@ -36,7 +36,7 @@ public class StyleEntry implements EntryPort.Entry {
 	public StyleEntry(Long gen, Long id, String n) {
 		if (id == null || id == EntryPort.NULL_INTEGER)
 			throw new NullPointerException();
-		this.genre = (gen != EntryPort.NULL_INTEGER ? gen : null);
+		this.genre = (gen != EntryPort.NULL_INTEGER) ? gen : null;
 		this.id = id;
 		this.name = n;
 		if (entryMap.containsKey(id))

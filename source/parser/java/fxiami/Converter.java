@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
@@ -158,15 +159,23 @@ public final class Converter {
 				en.area = null;
 			en.category = AlbumConverter.processCategory(cont);
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			if (en.playCount == null)
+				en.playCount = EntryPort.NULL_INTEGER;
 			en.likeCount = Helper.parseValidInteger(cont, "countLikes");
+			if (en.likeCount == null)
+				en.likeCount = EntryPort.NULL_INTEGER;
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
 			en.styles = SongConverter.processStyles(cont);
+			if (en.styles == null)
+				en.styles = new StyleEntry[0];
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
-				en.info = EntryPort.NULL_STRING;
+				en.info = null;
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
+			if (en.commentCount == null)
+				en.commentCount = EntryPort.NULL_INTEGER;
 			JSONArray arr = o.getJSONArray("artistExt");
 			if (arr != null && !arr.isEmpty()) {
 				for (int i = 0, len = arr.size(); i < len; i++) {
@@ -322,6 +331,8 @@ public final class Converter {
 			en.logoURL = Helper.parseValidString(cont, "albumLogo");
 			en.artists = processArtists(cont);
 			en.companies = processCompanies(cont);
+			if (en.companies == null)
+				en.companies = new ReferenceEntry[0];
 			en.category = processCategory(cont);
 			en.discCount = Helper.parseValidInteger(cont, "cdCount");
 			if (en.discCount != null && en.discCount == 0)
@@ -333,26 +344,30 @@ public final class Converter {
 			en.language = Helper.parseValidString(cont, "language");
 			if (en.language != null && en.language.isEmpty())
 				en.language = null;
+			en.gradeCount = Helper.parseValidInteger(cont, "gradeCount");
 			Double d = Helper.parseValidFloat(cont, "grade");
-			if (d != null && d != EntryPort.NULL_FLOAT) {
+			if (d != null && d > 0.0) {
 				en.grade = Math.round(d.doubleValue() * 10);
-			} else if (d == EntryPort.NULL_FLOAT) {
+			} else if (d != null) {
 				en.grade = EntryPort.NULL_INTEGER;
 			}
-			en.gradeCount = Helper.parseValidInteger(cont, "gradeCount");
-			if (en.grade != null && en.grade == 0 && (en.gradeCount == null || en.gradeCount < 10))
-				en.grade = EntryPort.NULL_INTEGER;
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			if (en.playCount == null)
+				en.playCount = EntryPort.NULL_INTEGER;
 			en.likeCount = Helper.parseValidInteger(cont, "collects");
+			if (en.likeCount == null)
+				en.likeCount = EntryPort.NULL_INTEGER;
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
 			en.styles = SongConverter.processStyles(cont);
 			en.info = Helper.parseValidString(cont, "description");
 			if (en.info != null && en.info.isEmpty())
-				en.info = EntryPort.NULL_STRING;
+				en.info = null;
 			en.songs = processSongs(cont);
 			en.commentCount = Helper.parseValidInteger(cont, "comments");
+			if (en.commentCount == null)
+				en.commentCount = EntryPort.NULL_INTEGER;
 			cont = o.getJSONObject("artistAlbums");
 			if (cont != null && !cont.isEmpty())
 				processSimilars(cont);
@@ -392,27 +407,6 @@ public final class Converter {
 				"artistId", "artistStringId", "artistName");
 		}
 		
-		static ReferenceEntry[] processSingers(JSONObject cont) {
-			if (!cont.containsKey("singerVOs"))
-				return null;
-			try {
-				JSONArray arr = cont.getJSONArray("singerVOs");
-				ReferenceEntry[] ens = new ReferenceEntry[arr.size()];
-				for (int i = 0; i < ens.length; i++) {
-					try {
-						ens[i] = Helper.parseValidEntry(arr.getJSONObject(i),
-							"artistId", "artistStringId", "artistName");
-					} catch (RuntimeException ex) {
-						System.out.println("Not a valid singer: " + String.valueOf(arr.get(i)));
-					}
-				}
-				return ens;
-			} catch (RuntimeException ex) {
-				System.out.println("Not valid singers: " + String.valueOf(cont.get("singerVOs")));
-				return EntryPort.forNullEntry(ReferenceEntry[].class);
-			}
-		}
-		
 		private static StaffEntry processStaff(JSONObject cont) {
 			StaffEntry en = new StaffEntry(cont.getString("type"));
 			en.name = Helper.parseValidString(cont, "name");
@@ -448,6 +442,29 @@ public final class Converter {
 				System.out.println("Not valid staffs: " + String.valueOf(cont.get("behindStaffs")));
 				return EntryPort.forNullEntry(StaffEntry[].class);
 			}
+		}
+		
+		static StaffEntry processSingers(JSONObject cont) {
+			if (!cont.containsKey("singerVOs"))
+				return null;
+			StaffEntry en = new StaffEntry("SINGER");
+			en.name = "演唱";
+			try {
+				JSONArray arr = cont.getJSONArray("singerVOs");
+				en.artists = new ReferenceEntry[arr.size()];
+				for (int i = 0; i < en.artists.length; i++) {
+					try {
+						en.artists[i] = Helper.parseValidEntry(arr.getJSONObject(i),
+							"artistId", "artistStringId", "artistName");
+					} catch (RuntimeException ex) {
+						System.out.println("Not a valid singer: " + String.valueOf(arr.get(i)));
+					}
+				}
+			} catch (RuntimeException ex) {
+				System.out.println("Not valid singers: " + String.valueOf(cont.get("singerVOs")));
+				en.artists = EntryPort.forNullEntry(ReferenceEntry[].class);
+			}
+			return en;
 		}
 		
 		static StyleEntry[] processStyles(JSONObject cont) {
@@ -600,7 +617,7 @@ public final class Converter {
 				en.track = EntryPort.NULL_INTEGER;
 			en.length = Helper.parseValidInteger(cont, "length");
 			if (en.length != null && en.length == 0)
-				en.length = null;
+				en.length = EntryPort.NULL_INTEGER;
 			en.pace = Helper.parseValidInteger(cont, "pace");
 			if (en.pace != null && en.pace == 0)
 				en.pace = null;
@@ -616,14 +633,23 @@ public final class Converter {
 				}
 			}
 			en.playCount = Helper.parseValidInteger(cont, "playCount");
+			if (en.playCount == null)
+				en.playCount = EntryPort.NULL_INTEGER;
 			en.likeCount = Helper.parseValidInteger(cont, "favCount");
+			if (en.likeCount == null)
+				en.likeCount = EntryPort.NULL_INTEGER;
 			if (!ext)
 				return en;
 			en.update = Helper.parseValidInteger(o, "update");
 			cont = o.getJSONObject("songExt");
 			if (cont != null && !cont.isEmpty()) {
-				en.singers = processSingers(cont);
 				en.staffs = processStaffs(cont);
+				StaffEntry ens = processSingers(cont);
+				if (ens != null) {
+					en.staffs = (en.staffs != null) ?
+						Arrays.copyOf(en.staffs, en.staffs.length + 1) : new StaffEntry[1];
+					en.staffs[en.staffs.length - 1] = ens;
+				}
 				try {
 					if (convertEntry("album", cont.getJSONObject("album"), false) != null)
 						System.out.println("Album extension added.");
@@ -636,6 +662,8 @@ public final class Converter {
 				if (Helper.isEmptyArray(en.infos))
 					en.infos = null;
 				en.commentCount = Helper.parseValidInteger(cont, "commentCount");
+				if (en.commentCount == null)
+					en.commentCount = EntryPort.NULL_INTEGER;
 				processSimilars(cont);
 			}
 			en.lyrics = processLyrics(o);
